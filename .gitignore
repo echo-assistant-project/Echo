@@ -1,0 +1,35 @@
+# Local Android/Gradle state and generated outputs
+.gradle/
+.kotlin/
+build/
+**/build/
+local.properties
+
+# Local environment, credentials, signing material, and certificates
+.env
+.env.*
+!.env.example
+**/secrets.json
+**/*secret*
+**/*credential*
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Local AI models and temporary artifacts
+*.task
+*.tflite
+*.litertlm
+*.bin
+*.wav
+*.tmp
+
+# Existing audit backups and IDE metadata
+*.backup*
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

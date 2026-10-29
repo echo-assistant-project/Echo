@@ -1,0 +1,3 @@
+<resources>
+    <string name="echo_accessibility_description">Optional screen text access for Echo. Visible text stays on this device in this starter.</string>
+</resources>
