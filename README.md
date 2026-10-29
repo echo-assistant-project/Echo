@@ -1,32 +1,37 @@
-# EchoPhone
+# Echo
 
-EchoPhone is the Android app in the Echo project. The repository also contains the optional Windows Kokoro speech service. FreeLLMAPI and EchoDesktop are external/not currently included.
+Echo is a cross-device assistant project. This repository currently contains EchoPhone for Android and an optional Windows Kokoro voice host. It does not contain EchoDesktop, FreeLLMAPI, or a bundled language model.
+
+EchoPhone combines an Android Compose interface, an OpenAI-compatible FreeLLMAPI client, optional MediaPipe local text inference, Android speech recognition, and spoken replies through Kokoro-82M af_heart on a paired Windows PC or Android TextToSpeech fallback.
+
+## Start here
 
 - [Architecture](docs/ARCHITECTURE.md)
-- [Feature audit](docs/FEATURE_AUDIT.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Setup for another Windows PC](docs/DEVELOPER_SETUP.md)
-- [Collaboration and synchronization](docs/COLLABORATION_GUIDE.md)
-- [Unified repository design](docs/UNIFIED_REPOSITORY_DESIGN.md)
+- [Development and setup](docs/DEVELOPMENT.md)
+- [Team workflow and synchronization](docs/TEAM_WORKFLOW.md)
+- [Security](docs/SECURITY.md)
+- [Current status and verification](docs/CURRENT_STATUS.md)
+- [Codex handoff](docs/CODEX_HANDOFF.md)
 
-## Quick build
+Older notes remain in [feature audit](docs/FEATURE_AUDIT.md), [troubleshooting](docs/TROUBLESHOOTING.md), and [repository design](docs/UNIFIED_REPOSITORY_DESIGN.md).
 
-Copy scripts/echo-env.example.ps1 to .echo-env.ps1, edit local paths, and load in PowerShell:
+## Build EchoPhone
+
+On Windows, install Git for Windows and use Android Studio/JDK or the supplied setup script. The project does not include gradlew.bat.
 
     Copy-Item scripts\echo-env.example.ps1 .echo-env.ps1
+    notepad .echo-env.ps1
     . .\.echo-env.ps1
     .\Setup-Build-Deploy.ps1
 
-The setup script provisions Android SDK, Java 17, and Gradle under selected paths. It does not persist Windows environment variables unless explicitly run with -PersistEnvironment. See the developer setup guide.
+See [Development](docs/DEVELOPMENT.md) for prerequisites, tests, backend setup, and Kokoro setup. Paths are machine-specific; secrets and model files are not in Git.
 
-## Safe synchronization
+## Current verification
 
-Run from the repository root:
+The Android debug build and available Gradle unit-test task were run on 2026-10-29. The APK is at F:\Android\Build\EchoPhone\outputs\apk\debug\app-debug.apk. The unit-test task reports NO-SOURCE; this project currently has no Kotlin/Java unit tests. See [Current status](docs/CURRENT_STATUS.md) for results and blockers.
 
-    .\scripts\sync-project.ps1
+## Collaboration
 
-This fetches origin/main and fast-forwards local main only when safe. It never switches branches, changes an active feature branch, overwrites uncommitted edits, force-resets, force-pushes, resolves conflicts, or merges PRs. Use -FetchOnly for scheduled background checks. Git transfers commits, not uncommitted edits.
+The private repository is https://github.com/echo-assistant-project/Echo. Use main for stable shared work and short-lived feature/* or fix/* branches for changes. The safe synchronization script is scripts/sync-project.ps1; it does not transfer uncommitted edits. See [Team workflow](docs/TEAM_WORKFLOW.md).
 
-## AI and voice configuration
-
-Each developer configures their own FreeLLMAPI access and local app settings. Kokoro models, TLS private keys, bearer keys, and pairing data are generated per PC and never committed.
+A Windows desktop app, continuous wake-word recognition, working screen vision, phone-side Kokoro playback verification, and automatic sync are not currently established features.

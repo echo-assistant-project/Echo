@@ -2,105 +2,73 @@
 
 Updated: 2026-10-29
 Project: F:\Downloads\EchoPhone
-Safety: Local repository only. No source has been pushed or published. No credentials belong in this file.
 
-## Initial state captured for this setup task
+## Current repository state
 
-- Branch: master
-- Initial HEAD: 76c92cc — Baseline EchoPhone before hands-free updates
-- Remotes: none
-- Branches: master only; no remote tracking branches
-- Initial working tree already contained related prior-session work:
-  - Modified: .gitignore, AssistantManager.kt, FloatingOrbComposeActivity.kt, MainActivity.java, ARCHITECTURE.md, FEATURE_AUDIT.md, TROUBLESHOOTING.md
-  - Untracked: Run-KokoroVoiceHost.ps1, Setup-KokoroVoice.ps1, KokoroVoiceClient.kt, PhoneActionRouter.kt, tools/KokoroVoice/
-- Ignored items observed: Gradle/build caches, local.properties, and timestamped backup copies.
-- No commits were made before this task. Existing source changes were retained.
+- Existing repository preserved; no new repository initialized.
+- Current working branch: feature/safe-sync-setup-ci.
+- Last committed remote checkpoint: ffffb8b — Add safe sync, Windows setup, and Android CI.
+- Local main and origin/main are e3c7a57. Remote feature branch points to ffffb8b and descends from origin/main.
+- Remote URL: https://github.com/echo-assistant-project/Echo.git.
+- At start of Stage 9, worktree was clean. Stage 9 documentation and this handoff are local edits until checkpointed; current instruction prohibits publishing them without explicit approval.
+- A prior push of ffffb8b succeeded. A draft PR was not created: GitHub connector returned 404 and gh CLI is unavailable. Do not assume PR or CI exists.
+- Do not push, create a PR/release, or change collaborators during recovery unless the user explicitly approves.
 
-## Audit summary
+## Project audit facts
 
-### Present
+- This checkout contains EchoPhone Android source and an optional Windows Kokoro voice host in tools/KokoroVoice.
+- No EchoDesktop .sln/.csproj or other desktop project exists here.
+- Android: application ID com.echo.assistant; MainActivity Java launcher; FloatingOrbComposeActivity Kotlin/Compose orb; AssistantManager chat/network/local-model router; PhoneActionRouter allow-listed Android intents.
+- Build: AGP 9.4.1, Kotlin Compose plugin 2.2.10, compile SDK 36, target SDK 35, min SDK 26; no Gradle wrapper.
+- FreeLLMAPI is external. The Android client uses an OpenAI-compatible /v1/models probe and /v1/chat/completions request with model auto, optional bearer key, and recent in-memory turns.
+- MediaPipe local inference code requires a compatible imported model; none is bundled.
+- Kokoro host binds to Windows loopback port 31416, authenticates with a bearer token, serves HTTPS/WAV, and uses Kokoro-82M af_heart assets stored outside Git. Android pins the cert and encrypts its Kokoro key through Android Keystore; Android TextToSpeech is fallback.
+- FreeLLMAPI key is stored in app SharedPreferences, not Android Keystore.
+- Foreground SpeechRecognizer voice session exists. WakeWordService is notification-only and does not detect a wake word.
+- ScreenAwarenessService reads accessible UI text in memory but is not connected to chat and does not capture screenshots.
+- PhoneActionRouter covers a bounded set of app/web/search intents. Contact/dialer/message-draft flow exists; sending/calling and actual Spotify/YouTube playback are not guaranteed.
+- No Kotlin/Java unit test sources or Python backend test suite exist.
 
-- Android app: Kotlin/Compose orb and assistant manager; Java launcher; Android manifest/resources; Gradle configuration.
-- AI: OpenAI-compatible FreeLLMAPI client in AssistantManager.kt.
-- Local Android model path: MediaPipe LLM Inference integration and model import UI; actual local inference requires a compatible model file.
-- Voice input: Android SpeechRecognizer path in the foreground orb flow.
-- Voice output: Kokoro-82M af_heart host/client integration plus Android TextToSpeech fallback. The Python host uses ONNX Runtime and binds to loopback.
-- Android actions: MainActivity contact lookup, dialer and message-draft intents; PhoneActionRouter allow-listed app/web/search intents.
-- Other Android components: notification-only WakeWordService and opt-in ScreenAwarenessService scaffold.
-- Build/deployment scripts: Setup-Build-Deploy.ps1 and Kokoro setup/host PowerShell scripts.
-- Documentation: README and architecture, audit, troubleshooting docs.
-- Tests: no test source tree or automated test suite found.
-- Co-founder build prerequisites: Android Studio/JDK 17+, Android SDK platform 36/build-tools 36, Gradle 9.6; Kokoro host additionally requires Python 3.12, kokoro-onnx dependencies, and externally downloaded model/voice assets.
-- Windows desktop source: none found under this project root. A later unified Android/Desktop repository needs the desktop source supplied or identified before claiming it contains the full ecosystem.
-- Git at Stage 3 audit: local-only history through 98eeb6e; no remote.
+## Stage 9 — documentation
 
-### Actual verification recorded
+Status: COMPLETE locally.
 
-- Earlier in the project: debug APK built and installed on authorized Realme device.
-- Earlier in the project: Kokoro model inference generated audio; authenticated local HTTPS request returned a valid WAV after certificate-fingerprint verification.
-- Earlier in the project: ADB reverse routes for FreeLLMAPI 31415 and Kokoro 31416 were active.
-- Phone playback through Kokoro is not yet verified. At last inspection the phone was at its lock screen and EchoPhone had no saved Kokoro pairing values.
-- FreeLLMAPI code/configuration was preserved; this setup task did not repeat a live chat request.
-- The PowerShell build script has persistent User environment-variable writes and possible SDK/JDK downloads. Prefer process-scoped F: paths for builds.
+Canonical documents:
+- README.md
+- docs/ARCHITECTURE.md
+- docs/DEVELOPMENT.md
+- docs/TEAM_WORKFLOW.md
+- docs/SECURITY.md
+- docs/CURRENT_STATUS.md
+- docs/CODEX_HANDOFF.md
 
-### Security review
+Existing docs/FEATURE_AUDIT.md, docs/TROUBLESHOOTING.md, docs/DEVELOPER_SETUP.md, docs/COLLABORATION_GUIDE.md, and docs/UNIFIED_REPOSITORY_DESIGN.md remain for additional details. No source components were moved.
 
-- Scanned current source and reachable history before the source checkpoint, then scanned the staged patch for common API-key/token/password/private-key patterns. No high-confidence matches found; no secret values were printed.
-- No credential-named files are tracked in the baseline.
-- Kokoro pairing data, API token, server certificate/private key are outside the repository at F:\Android\EchoVoice and have user-only ACLs.
-- Updated .gitignore to cover local credentials, signing keys, generated APKs, caches, and model weights without broad filename patterns that could hide source code.
-- This is a pattern-based check, not a guarantee against every possible secret or high-entropy value.
+## Stage 10 — verified outcomes
 
-## Checkpoints
+- Existing project: PASSED.
+- Backup: PASSED. F:\Downloads\EchoPhone-final-backup-20261029-192827.zip exists, 168,122 bytes, SHA-256 5879e929f9f08fb4073fed66ceab4755b4eedef4d25957ae79a5ed490002e008, matching the recorded value. Prior handoff says extraction matched commit 98eeb6e.
+- Tracked text credential scan: PASSED bounded scan; no matches for selected API key/bearer/private-key patterns. Not an exhaustive binary/remote-history audit.
+- Repository privacy/founder role: PASSED based on preceding setup session verification (private Echo repo; Akshaj-echo Owner). Current GitHub connector returned no repo details for re-verification.
+- Co-founder role: BLOCKED pending exact GitHub username and accepted invitation.
+- Remote files: Stage 6–8 commit present at origin/feature/safe-sync-setup-ci. Stage 9 docs are local and intentionally not pushed under the current instruction.
+- History: PASSED; feature branch descends from origin/main e3c7a57; no reset, rebase, or force-push.
+- Android: PASSED on 2026-10-29. Existing Gradle 9.6.0, Android SDK 36, Android Studio Java 25; command used one worker and a 768 MB heap. testDebugUnitTest was NO-SOURCE; assembleDebug succeeded. Fresh APK: F:\Android\Build\EchoPhone\outputs\apk\debug\app-debug.apk, 22,532,672 bytes. No device install/test because phone is disconnected.
+- First Android build attempt failed when Gradle daemon disappeared after dexing. A one-worker/smaller-heap retry passed. Gradle reported deprecation warnings for Gradle 10.
+- Kokoro Python 3.12 syntax: PASSED for tools/KokoroVoice/server.py. Model inference/host runtime not retested during Stage 9.
+- EchoDesktop build: NOT TESTED; no desktop source project exists to build.
+- Sync script: BLOCKED for end-to-end safety tests. PowerShell parser passed earlier, but sandbox account lacked write access to F:\Downloads\EchoPhone\.git lock and disposable Git object storage. Do not claim data-preservation behavior was test-proven.
+- Uncommitted edit protection: NOT TESTED end-to-end.
+- Documentation: PASSED against inspected source/config.
+- Public deployment: PASSED; no public repo/release/deployment created in Stage 9.
+- Task Scheduler: no task created or activated.
+- Current CI workflow: committed on the remote feature branch, but NOT TESTED because no PR or workflow run is confirmed.
 
-### Stage 1 — Audit
+## Current blockers and next actions
 
-Status: COMPLETE.
-
-Reviewed Git status, branches, history, remotes, tracked files, project source/configuration, Android manifest, build script, Python host, setup scripts, documentation, and presence of tests/desktop source.
-
-### Stage 2 — Backup and publication readiness
-
-Status: local audit, source checkpoint, and recoverable backup COMPLETE. GitHub setup is deferred until the organization slug and co-founder username are provided.
-
-- Earlier backup: F:\Downloads\EchoPhone-backup-20261029-191446.zip (136 entries; 115,117 bytes; SHA-256 623340d2034e0f40aeb14a00db76e79be8480b577b949e5480c0ce28fe731fdf).
-- Latest verified backup: F:\Downloads\EchoPhone-final-backup-20261029-192827.zip (121 entries; 168,122 bytes; SHA-256 5879e929f9f08fb4073fed66ceab4755b4eedef4d25957ae79a5ed490002e008). Fresh extraction matched HEAD 98eeb6e and included source plus Git history; generated build/cache directories and local.properties were excluded.
-- Secret scan: completed; no high-confidence matches in current files or existing commit.
-- History at archive time: 76c92cc baseline; 6f95709 source checkpoint; c4138d4 handoff checkpoint. No remote history.
-- Publication: deferred by user. No organization/repository remote exists. The user will provide the organization slug and co-founder GitHub username later. Current GitHub integration cannot create organizations/repositories or invite owners.
-- Available GitHub integration does not expose create-organization, create-repository, or invite-owner operations. Do not substitute a personal public repository or push anywhere else.
-
-## Current Git checkpoint
-
-- Branch: master
-- Latest source checkpoint: 6f95709d7e9d1c69381bd83a8c236db52ddc1a6b
-- Commit: Add Kokoro voice host and EchoPhone hands-free flow
-- Remote: none; no source pushed
-- Latest local checkpoint: 98eeb6eda58e5f9fdf26c10c7908284654984d87 (documentation only); no remote and nothing pushed.
-
-## Working requirements and boundaries
-
-- Preserve the existing F:\Downloads\EchoPhone directory and all user work.
-- Do not reset, clean, force-push, rewrite history, move the project, or delete unrelated files.
-- Keep the remote private and invite only the co-founder as an Owner once organization identity and account are supplied.
-- Do not publish until privacy, credential, and history checks pass and the exact organization/repository destination is confirmed.
-- Keep Android SDK, Gradle caches, temp, model, and build output on F: where configured.
-- Do not place any keys, passwords, tokens, private certificates, or private pairing values in Git or this handoff.
-
-## Commands and outcomes in this setup
-
-- git status --short: initial modifications/untracked files listed above.
-- git branch -av: master only.
-- git log --oneline --decorate --all: source checkpoint 6f95709 Add Kokoro voice host and EchoPhone hands-free flow; baseline 76c92cc.
-- git remote -v: no remotes.
-- git ls-files: Android source/config/docs only; no desktop or test project.
-- Pattern scan of working tree and reachable history: no high-confidence credential matches.
-- Last known build/install: Gradle assembleDebug succeeded; APK installed. Current turn has not changed Kotlin/Gradle source.
-
-## Pending work and next action
-
-1. COMPLETE: local audit, source checkpoint, ignore review, secret-pattern scan, and backup verification are recorded above.
-2. WAITING FOR USER: provide the GitHub organization slug and co-founder GitHub username after EchoPhone is ready.
-3. COMPLETE: Stage 3 monorepo design and Stage 5 collaboration instructions are documented in docs/UNIFIED_REPOSITORY_DESIGN.md and docs/COLLABORATION_GUIDE.md. No source was moved. Windows desktop source is still absent.
-4. Phone-dependent Kokoro playback is NOT TESTED in this session because the Android phone is disconnected. Computer-based work continues without it.
-5. WAITING FOR USER APPROVAL: confirm organization display name/slug, repository name, private visibility, founder and co-founder GitHub logins, and exact initial upload scope before any GitHub creation or push.
+1. Review docs/CURRENT_STATUS.md. It contains the Stage 10 matrix and limitations.
+2. If the user approves publishing this documentation checkpoint, push the local branch and create/review a PR; only then can CI run. Until then, keep Stage 9 local.
+3. Obtain the co-founder's exact GitHub username before inviting them; verify accepted Owner access afterward.
+4. For sync-script safety acceptance, run the smoke tests as the Windows account that owns the F: checkout: fast-forward local main while a feature branch and an untracked edit are present, then assert feature HEAD and file bytes are unchanged. Also test dirty active main refusal, divergence refusal, fetch failure, and concurrent lock.
+5. A physical phone is not needed for documentation/build work. For Kokoro playback, phone action, microphone, or permission verification, obey the user's USB connection protocol: ask them to connect first, then verify ADB once.
+6. Do not change firewall settings, create a public endpoint, install persistent services, activate scheduled sync, invite a collaborator, or publish remotely without explicit approval.
