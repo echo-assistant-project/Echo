@@ -46,9 +46,9 @@ This checkout contains EchoPhone and an optional Windows Kokoro voice host. Echo
 
 ## Current collaboration state
 
-- Current local branch: feature/safe-sync-setup-ci at 6a80599. origin/feature/safe-sync-setup-ci remains at ffffb8b; the local branch is one commit ahead.
+- Current local branch: feature/safe-sync-setup-ci. origin/feature/safe-sync-setup-ci remains at ffffb8b; Stage 9 documentation commits are ahead and unpushed. Inspect git log for the local tip.
 - main and origin/main remain at e3c7a57.
-- Remote feature branch contains the Stage 6–8 commit. Stage 9 documentation is committed locally at 6a80599 but not pushed. No draft PR was created and no workflow result exists.
+- Remote feature branch contains the Stage 6–8 commit. Stage 9 documentation is committed locally but not pushed. No draft PR was created and no workflow result exists.
 - Remote: https://github.com/echo-assistant-project/Echo.git. This stage has not pushed anything.
 - Co-founder invitation remains pending exact username.
 - Automatic synchronization is not enabled; Task Scheduler was not changed.
