@@ -1,56 +1,44 @@
 # EchoPhone Architecture
 
-Audit date: 2026-10-28
+Audit date: 2026-10-29
 
-## Build and package
+## Build and app flow
 
-- Android application ID / Kotlin package: com.echo.assistant.
-- Launcher activity: MainActivity (Java), declared as the exported launcher.
-- Orb/LLM screen: FloatingOrbComposeActivity (Kotlin), opened from the launcher as a preview.
-- Build: Android Gradle Plugin 9.4.1, Kotlin Compose plugin 2.2.10, Compose BOM 2025.08.00, compile SDK 36, target SDK 35, minimum SDK 26.
-- The project has no Gradle wrapper. Setup-Build-Deploy.ps1 invokes Gradle 9.6.0 and places build/cache/temp paths on F:, but also persists User environment variables and may download/install JDK or Android SDK packages. A direct build with process-scoped variables avoids those machine/user changes.
-- local.properties must point to F:/Android/Sdk; it was malformed (s) and has been corrected.
+- Android application ID: com.echo.assistant.
+- MainActivity is the launcher and exposes standalone phone actions.
+- FloatingOrbComposeActivity contains the Compose orb, chat with AssistantManager, voice settings, and continuous foreground voice loop.
+- The debug app uses Android Gradle Plugin 9.4.1, Kotlin Compose plugin 2.2.10, compile SDK 36, target SDK 35, minimum SDK 26.
+- The debug APK is built to F:\Android\Build\EchoPhone\outputs\apk\debug\app-debug.apk. Android SDK, Gradle home, temp, and build output are on F:.
+- The project has no Gradle wrapper; use the existing Gradle installation with process-scoped paths rather than the setup script that changes persistent environment variables.
 
-## Runtime flows
+## AI request path
 
-### Launcher screen
+- AssistantManager sends non-streaming OpenAI-compatible requests to the saved FreeLLMAPI URL, normally http://127.0.0.1:31415/v1, with model auto, messages, and an optional Bearer key.
+- It probes and chats against the same validated /v1 base and reports HTML/non-JSON responses without attempting unsafe JSON parsing.
+- Recent conversation turns are kept in memory for follow-up questions. The existing FreeLLMAPI integration is unchanged by the voice update.
+- USB access requires ADB reverse forwarding for tcp:31415. The connection is local to the PC and USB route; do not expose the API publicly.
+- The optional local MediaPipe inference path requires a compatible user-selected model. No model is bundled or downloaded by EchoPhone.
 
-MainActivity.java provides:
-- Speech-to-text by launching the Android platform recognizer (English India locale).
-- Text-to-speech using the installed Android engine.
-- App launching by matching launcher-app labels.
-- Contact lookup for call and message requests.
-- Calls open the system dialer for user confirmation; messages open the messaging app with a prefilled draft. The app does not silently place calls or send SMS.
-- These actions use simple command-prefix matching and static fallback wording. The launcher itself does not call an LLM.
+## Speech output: Kokoro default
 
-### Orb preview and PC AI
+- Default voice in the orb chat is Kokoro-82M voice af_heart. The model runs on the Windows PC in a local Python ONNX Runtime service. Android receives WAV audio and plays it.
+- Model files are stored outside the repository at F:\Android\KokoroVoice\models. The int8 ONNX file is 114,119,327 bytes and the voice pack is 28,214,398 bytes. Both are SHA-256 checked by Setup-KokoroVoice.ps1.
+- The voice host binds only to 127.0.0.1:31416, requires a random Bearer token, uses TLS, and only accepts synthesis requests at /v1/tts. It does not expose a router-facing network listener.
+- Android pins the server certificate SHA-256, validates the allowed loopback endpoint, stores the Bearer key encrypted using Android Keystore, validates the WAV response, and falls back to the selected Android system TTS voice if Kokoro is unavailable.
+- Voice credentials are created in F:\Android\EchoVoice\pairing.txt. Setup applies a per-file ACL granting access only to the current Windows user. Treat that file as private.
+- USB access requires ADB reverse tcp:31416. The Android app must be paired by entering the endpoint, Bearer key, and certificate fingerprint into the orb voice settings.
+- The basic MainActivity standalone controls still use Android TextToSpeech; Kokoro is the default for spoken chat replies in the orb activity. Android speech recognition remains the phone's system recognition service.
+- Actual Kokoro inference and the authenticated TLS WAV endpoint have been tested on the PC. Phone-side audio playback has not yet been verified because voice credentials still need to be entered in the phone UI.
 
-FloatingOrbComposeActivity.kt provides:
-- Compose orb states, tap-to-talk through Android speech recognition, typed prompts, TTS replies, a PC API URL/key form, and local model file selection.
-- It calls AssistantManager using a base URL ending in /v1.
-- AssistantManager.kt probes GET /v1/models, sends POST /v1/chat/completions with a bearer key and model auto, and reads the first response choice.
-- Requests are non-streaming. The client does not currently provide multi-turn conversation history.
-- PC screen vision is only a manager parameter accepting an optional base64 JPEG. No code in the current UI captures a screenshot or supplies an image to that parameter.
+## Voice conversation and phone actions
 
-The installed FreeLLMAPI desktop UI bundle documents OpenAI-compatible Chat Completions at /v1/chat/completions, and examples use Authorization: Bearer <API key> with model auto. The running FreeLLMAPI process on this PC listened at 127.0.0.1:31415 during the audit. That bind is loopback-only and is not reachable from a separate phone over Wi-Fi.
+- The orb supports tap-to-start continuous foreground speech recognition, visible transcripts, chat responses, stop control, and restart listening after the reply.
+- PhoneActionRouter accepts explicit allow-listed requests for opening apps, websites, Google search, YouTube search, and Spotify search. It does not execute arbitrary model text.
+- MainActivity supports app opening, contact lookup, opening the dialer, and preparing a message draft. Calls and texts require the user's final action in Android's own app.
+- Background wake-word listening is not implemented or claimed.
 
-### On-device fallback
+## Other existing components
 
-- The app imports a user-selected file into private app storage and initializes com.google.mediapipe.tasks.genai.llminference.LlmInference on the first local request.
-- The current implementation does not bundle or download weights.
-- MediaPipe LLM Inference expects a model/task bundle compatible with its runtime, generally a .task model (not arbitrary GGUF or an arbitrary binary). The code currently copies any selected non-empty file without validating that it can initialize; a failed load is reported only when inference starts.
-- No model is present in the installed app's files/models directory, so local inference is not currently available or verified.
-- The MediaPipe Android guide currently says that API is maintenance-only and recommends LiteRT-LM for new projects: https://developers.google.com/edge/mediapipe/solutions/genai/llm_inference/android
-
-### Other services
-
-- WakeWordService.kt only creates a foreground-service notification. It does not listen to a microphone or detect a wake word.
-- ScreenAwarenessService.kt is an opt-in AccessibilityService that collects visible node text into an in-memory string. It does not capture pixels, does not send text to the LLM, and is not connected to the current prompt flow.
-- echo_accessibility_service.xml requests window-content access, which the user must enable in Android accessibility settings.
-- The manifest includes Internet/network-state, contacts, overlay, notification, microphone foreground-service declarations, and allows cleartext HTTP. Cleartext should only be used on a trusted network and without exposing keys to untrusted clients.
-
-## Data and secrets
-
-- PC endpoint and unified API key are saved in Android SharedPreferences (echo_connection).
-- The key is sent as an HTTP Bearer token. HTTP on a LAN does not encrypt that key; use HTTPS or a trusted isolated network.
-- The app uses intents to pass call/message actions to Android apps. It does not send messages without the user's final action.
+- WakeWordService remains a notification-only scaffold.
+- ScreenAwarenessService is an opt-in accessibility service that collects visible node text; it is not wired into the current LLM message path and does not take screenshots.
+- No Windows backend source is part of the Android project. The Kokoro local voice host is the only new PC-side companion component.

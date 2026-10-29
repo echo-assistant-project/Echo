@@ -40,6 +40,9 @@ class AssistantManager(context: Context) {
         .build()
     private val jsonType = "application/json; charset=utf-8".toMediaType()
     private val generationMutex = Mutex()
+    private data class ChatTurn(val user: Any, val assistant: String)
+    private val historyLock = Any()
+    private val recentTurns = ArrayDeque<ChatTurn>()
     private var localEngine: LlmInference? = null
     private val modelFile = File(File(appContext.filesDir, "models"), "echo-local-model.bin")
 
@@ -133,7 +136,16 @@ class AssistantManager(context: Context) {
         mutableUiState.value = UiState(BackendState.LOCAL_FALLBACK, "PC API unavailable: $remoteFailure. Running on local fallback.")
         generationMutex.withLock {
             val engine = localEngine ?: createLocalEngine().also { localEngine = it }
-            engine.generateResponse(PERSONA + 10.toChar() + "User: " + userText + 10.toChar() + "Echo:")
+            val previous = synchronized(historyLock) { recentTurns.toList() }
+            val prompt = buildString {
+                append(PERSONA).append(10.toChar())
+                previous.forEach { turn ->
+                    if (turn.user is String) append("User: ").append(turn.user).append(10.toChar())
+                    append("Echo: ").append(turn.assistant).append(10.toChar())
+                }
+                append("User: ").append(userText).append(10.toChar()).append("Echo:")
+            }
+            engine.generateResponse(prompt).also { rememberTurn(userText, it) }
         }
     }
 
@@ -142,9 +154,14 @@ class AssistantManager(context: Context) {
             .put(JSONObject().put("type", "text").put("text", userText))
             .put(JSONObject().put("type", "image_url").put("image_url",
                 JSONObject().put("url", "data:image/jpeg;base64," + imageJpegBase64)))
-        val messages = JSONArray()
-            .put(JSONObject().put("role", "system").put("content", PERSONA))
-            .put(JSONObject().put("role", "user").put("content", userContent))
+        val messages = JSONArray().put(JSONObject().put("role", "system").put("content", PERSONA))
+        synchronized(historyLock) {
+            recentTurns.forEach { turn ->
+                messages.put(JSONObject().put("role", "user").put("content", turn.user))
+                messages.put(JSONObject().put("role", "assistant").put("content", turn.assistant))
+            }
+        }
+        messages.put(JSONObject().put("role", "user").put("content", userContent))
         val payload = JSONObject().put("model", "auto").put("messages", messages).put("stream", false)
         val request = requestBuilder(config, "chat/completions")
             .post(payload.toString().toRequestBody(jsonType)).build()
@@ -167,7 +184,7 @@ class AssistantManager(context: Context) {
                 ?: throw IOException("FreeLLMAPI response JSON has no choices[0].message.")
             val content = message.opt("content")
                 ?: throw IOException("FreeLLMAPI response JSON has no message content.")
-            if (content is String) content else {
+            val reply = if (content is String) content else {
                 val parts = content as? JSONArray ?: throw IllegalStateException("Unexpected LLM response format")
                 buildString {
                     for (i in 0 until parts.length()) {
@@ -176,6 +193,15 @@ class AssistantManager(context: Context) {
                     }
                 }
             }
+            rememberTurn(userContent, reply)
+            reply
+        }
+    }
+
+    private fun rememberTurn(user: Any, assistant: String) {
+        synchronized(historyLock) {
+            recentTurns.addLast(ChatTurn(user, assistant))
+            while (recentTurns.size > 8) recentTurns.removeFirst()
         }
     }
 
@@ -240,7 +266,4 @@ class AssistantManager(context: Context) {
         private const val KEY_API_KEY = "pc_api_key"
     }
 }
-
-
-
 

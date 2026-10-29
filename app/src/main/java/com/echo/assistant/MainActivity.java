@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         getWindow().setStatusBarColor(Color.rgb(4,10,19)); getWindow().setNavigationBarColor(Color.rgb(4,10,19));
-        tts = new TextToSpeech(this, result -> { if (result == TextToSpeech.SUCCESS) { tts.setLanguage(Locale.UK); tts.setSpeechRate(.94f); ttsReady = true; } });
+        tts = new TextToSpeech(this, result -> { if (result == TextToSpeech.SUCCESS) { tts.setLanguage(Locale.US); tts.setPitch(1.0f); tts.setSpeechRate(.9f); ttsReady = true; } });
         buildUi();
     }
     private int dp(int n) { return Math.round(n * getResources().getDisplayMetrics().density); }
@@ -71,11 +71,7 @@ public class MainActivity extends Activity {
         if(lo.equals("stop")||lo.equals("cancel")){if(tts!=null)tts.stop();status.setText("STOPPED");return;}
         reply("I can open an app, start a call, or prepare a text. Try ‘Open Maps’ or ‘Text Alex saying I’m outside.’");
     }
-    private void openApp(String name){Intent q=new Intent(Intent.ACTION_MAIN);q.addCategory(Intent.CATEGORY_LAUNCHER);PackageManager pm=getPackageManager();List<android.content.pm.ResolveInfo> apps=pm.queryIntentActivities(q,0);android.content.pm.ResolveInfo hit=null;
-        for(android.content.pm.ResolveInfo a:apps)if(a.loadLabel(pm).toString().equalsIgnoreCase(name)){hit=a;break;}
-        if(hit==null)for(android.content.pm.ResolveInfo a:apps){String n=a.loadLabel(pm).toString().toLowerCase(Locale.ROOT);if(n.startsWith(name)||name.startsWith(n)){hit=a;break;}}
-        if(hit==null){status.setText("Couldn’t find “"+name+"”. Try the full app name.");reply("I couldn’t find "+name+" on this phone.");return;}Intent launch=pm.getLaunchIntentForPackage(hit.activityInfo.packageName);if(launch!=null){status.setText("OPENING  ·  "+hit.loadLabel(pm));launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);startActivity(launch);}else status.setText("This app has no launch screen.");
-    }
+    private void openApp(String name){PhoneActionRouter.Result result=PhoneActionRouter.tryHandle(this,"open "+name);status.setText(result.getMessage());transcript.setText(result.getMessage());if(result.getHandled())say(result.getMessage());}
     private void requestContacts(){if(checkSelfPermission(Manifest.permission.READ_CONTACTS)==PackageManager.PERMISSION_GRANTED)findContact();else requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},CONTACTS);}
     @Override public void onRequestPermissionsResult(int request,String[] p,int[] g){super.onRequestPermissionsResult(request,p,g);if(request==CONTACTS){if(g.length>0&&g[0]==PackageManager.PERMISSION_GRANTED)findContact();else{status.setText("Contacts permission was not granted.");reply("I need contacts permission to find that person. No call or text was started.");}}}
     private String findNumber(String wanted){Cursor c=null;try{c=getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.CommonDataKinds.Phone.NUMBER},null,null,ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" COLLATE NOCASE ASC");if(c==null)return null;String partial=null;while(c.moveToNext()){String n=c.getString(0),num=c.getString(1);if(n==null||num==null)continue;if(n.equalsIgnoreCase(wanted))return num;if(n.toLowerCase(Locale.ROOT).contains(wanted.toLowerCase(Locale.ROOT))&&partial==null)partial=num;}return partial;}catch(SecurityException e){return null;}finally{if(c!=null)c.close();}}

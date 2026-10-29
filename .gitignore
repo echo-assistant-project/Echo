@@ -1,35 +1,59 @@
-# Local Android/Gradle state and generated outputs
+# Android / Gradle generated state
 .gradle/
 .kotlin/
 build/
 **/build/
 local.properties
+**/.idea/
+.vs/
+.vscode/
+.DS_Store
+Thumbs.db
+**/__pycache__/
+*.py[cod]
+**/venv/
+**/.venv/
+node_modules/
 
-# Local environment, credentials, signing material, and certificates
+# Local credentials and signing material
 .env
 .env.*
 !.env.example
 **/secrets.json
-**/*secret*
-**/*credential*
+**/secrets.yaml
+**/secrets.yml
+**/credentials.json
+**/credentials.yaml
+**/credentials.yml
+**/pairing.txt
+**/api-key.txt
+**/server-key.pem
+**/server-cert.pem
+**/server.cer
 *.jks
 *.keystore
 *.p12
 *.pfx
-*.pem
+*.p8
 *.key
+*.pem
 
-# Local AI models and temporary artifacts
+# Local model weights, synthesized audio, and build packages
 *.task
 *.tflite
 *.litertlm
+*.onnx
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.model
 *.bin
 *.wav
+*.apk
+*.aab
 *.tmp
+*.log
 
-# Existing audit backups and IDE metadata
+# Local audit backups
 *.backup*
-.idea/
-.vscode/
-.DS_Store
-Thumbs.db

@@ -1,48 +1,43 @@
 # Feature Audit
 
-Audit date: 2026-10-28
+Audit date: 2026-10-29
 Project: F:\Downloads\EchoPhone
 
-## Summary
+## Current results
 
-The Kotlin build errors reported earlier are fixed, the debug APK builds and installs, and the Windows-side FreeLLMAPI process was inspected. The AI connection is NOT verified end to end. The current FreeLLMAPI listener is loopback-only, the phone is on a different network route, and the authenticated model/chat request was not successful because a usable API key was not supplied for this test. No local model is installed.
-
-## Feature status
-
-| Area | Status | Evidence / limits |
+| Area | Status | Evidence and limits |
 |---|---|---|
-| Gradle / Kotlin build | PASS | assembleDebug completed after repairing the Kotlin return/import and later connection changes. |
-| Debug deployment | PASS | ADB reported the Realme device authorized; install returned Success; package com.echo.assistant is installed. |
-| Main launcher | PARTIAL | Java launcher supports tap-to-talk, typed commands, opening visible apps, contact search, opening dialer, and prefilled SMS draft. Not an LLM chat surface; command parsing is simple. |
-| Compose orb / typed LLM | PARTIAL / BLOCKED | Code exists in a separate preview activity. Requires a reachable API endpoint and valid key. The launcher does not integrate the LLM flow. |
-| FreeLLMAPI protocol | VERIFIED CONTRACT, REQUEST BLOCKED | Installed FreeLLMAPI UI bundle documents OpenAI-compatible /v1/chat/completions, Bearer API key, and a model field (example: auto). The client now sends model: auto. Live /v1/models without a user API key returned HTTP 401. No successful real chat request was recorded. |
-| FreeLLMAPI PC-to-phone network | BLOCKED | FreeLLMAPI process listened on 127.0.0.1:31415 only. Port 3001 had no listener. The phone's route was 100.109.55.152 via rmnet_data2; PC Wi-Fi address was 192.168.1.11. They were not on the same LAN path. Firewall behavior cannot be conclusively isolated while the API is not listening on a LAN interface. |
-| API key handling | IMPLEMENTED, UNVERIFIED | Android sends the configured user API key as Authorization: Bearer .... No user-created API key was obtained or saved. The Electron process exposes a separate private desktop token in its process arguments; that token returned 401 against /v1/models and is not a substitute. |
-| Local LLM fallback | NOT AVAILABLE / UNVERIFIED | run-as com.echo.assistant ls files/models reported no such directory. No model has been installed or run. File picker copies any non-empty file; runtime compatibility is not validated at import time. |
-| Voice input/output | PARTIAL | Android speech-recognition activity and Android TTS are wired in both screens. Recognition quality depends on the selected Android speech service/network and locale. TTS voice selection is heuristic and device-dependent. |
-| Wake word/background listening | NOT IMPLEMENTED | WakeWordService is a notification-only scaffold; there is no microphone loop or wake-word detector. |
-| Screen awareness | PARTIAL SCAFFOLD | Accessibility service collects view text in memory only. No screenshot capture, no image upload, and no wiring into the LLM request path. |
-| Android actions | PARTIAL | Open app, resolve contacts, open dialer, prepare SMS. No direct SMS send or direct call. |
-| Existing Windows backend | NOT IN THIS PROJECT | No Windows backend source is present in the EchoPhone project. FreeLLMAPI desktop application is external to this repository. |
+| Android debug build | PASS | Gradle assembleDebug completed successfully; APK is 22,532,410 bytes. |
+| Android deployment | PASS | ADB install -r completed; package com.echo.assistant is installed on the connected Realme RMX5116IN. |
+| FreeLLMAPI preservation | PASS | AssistantManager and the existing 31415 configuration were not changed for Kokoro. Both reverse routes 31415 and 31416 are active. Prior verified FreeLLMAPI API behavior remains the expected backend. |
+| Kokoro assets | PASS | Int8 ONNX and voices pack are present on F: and match expected SHA-256 hashes. A real af_heart inference generated 24 kHz samples. |
+| Kokoro host security | PASS | Host binds 127.0.0.1:31416; Bearer authentication and TLS are enabled. The live certificate fingerprint matched pairing data after restarting the stale listener. Private key, token, and pairing file have current-user-only ACLs. |
+| Kokoro HTTP synthesis | PASS | Authenticated, fingerprint-checked request returned HTTP 200, audio/wav, and a valid RIFF/WAVE payload. |
+| Android Kokoro playback | NOT YET VERIFIED | APK is installed and USB reverse is active. Phone is at its lock screen; the app still needs the private key and certificate fingerprint entered in voice settings. |
+| Android TTS fallback | IMPLEMENTED, NOT DEVICE-TESTED HERE | The orb falls back to the selected installed Android voice if Kokoro service or playback fails. |
+| Voice input / conversation | IMPLEMENTED, DEVICE TEST PENDING | The orb uses the Android speech recognizer in a foreground, stop-able listening loop. It is not an always-on wake-word service. |
+| App actions | PARTIAL | The orb router handles explicit app and website/search requests. MainActivity handles contacts, opening the dialer, and drafting messages; sending/calling remains user-confirmed. |
+| Local on-device LLM | NOT VERIFIED | MediaPipe runtime exists, but no compatible local model is bundled or installed. |
+| Screen awareness | PARTIAL SCAFFOLD | Accessibility text collection exists but is not connected to the LLM request; screenshot vision is not currently working. |
 
-## Fixes made in this audit
+## Compilation fixes made in this continuation
 
-- AssistantManager.kt: added the missing explicit return in the chat response function (previous stage), added diagnostic probe/error text, preserves coroutine cancellation, and sends the documented model: auto field.
-- FloatingOrbComposeActivity.kt: corrected animateColorAsState package import (previous stage).
-- app/build.gradle: added the BOM-managed Compose animation dependency (previous stage).
-- local.properties: replaced invalid content s with sdk.dir=F:/Android/Sdk.
-- README.md: updated to describe the actual app split and verified API/model limits.
-- Added this audit and architecture/troubleshooting documentation.
-- Timestamped .backup-* files were created beside changed project files because the directory has no Git repository.
+- PhoneActionRouter.kt: made the parsed URI null check explicit for Kotlin's nullable type.
+- KokoroVoiceClient.kt: switched to the current OkHttp URL parsing extension.
+- MainActivity.java: accesses Kotlin data class properties through generated Java getters.
+- FloatingOrbComposeActivity.kt: removed a stale Zira cache filename.
 
-## Acceptance status
+## Files added or changed for Kokoro
 
-1. Repository audit: PASS.
-2. Kotlin compilation errors: PASS.
-3. Debug APK build: PASS.
-4. FreeLLMAPI issue diagnosed: PASS (wrong port assumption, loopback-only bind, required Bearer key, and client missing model field).
-5. Real AI request through verified backend: BLOCKED (no valid API key was supplied to the test; local API returned 401).
-6. Local fallback compatibility and status documented: PASS as NOT AVAILABLE; no model installed or tested.
-7. Preserve existing functionality: PASS; changes were limited to return/import/dependency, API diagnostics/contract, SDK path, and docs.
-8. All tests reported: PASS with explicit integration blocker. This stage is not fully complete until the API is reachable from the phone and a real keyed chat request succeeds.
+- Setup-KokoroVoice.ps1: verifies/downloads pinned model assets as needed, prepares TLS identity and a random pairing token, and restricts secret file ACLs.
+- Run-KokoroVoiceHost.ps1 and tools/KokoroVoice/server.py: start the authenticated loopback-only synthesis service.
+- KokoroVoiceClient.kt: encrypted bearer-key storage, certificate pinning, request and WAV validation.
+- FloatingOrbComposeActivity.kt: Kokoro af_heart default voice option and Android TTS fallback, alongside voice controls and continuous foreground conversation.
+- PhoneActionRouter.kt: allow-listed app/web action mapping.
 
+## Remaining verification
+
+1. Unlock the phone and enter endpoint, Bearer key, and SHA-256 fingerprint from the private pairing file in the orb voice settings.
+2. Use the voice test button, then ask a short AI question and confirm Kokoro audio plays on the phone.
+3. Verify Android TTS fallback by stopping the Windows voice host and testing one spoken reply.
+4. Confirm microphone permission and speech recognition on the phone. These were not granted by ADB.
