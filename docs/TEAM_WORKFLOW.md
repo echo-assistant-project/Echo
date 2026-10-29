@@ -5,8 +5,9 @@
 - Organization: https://github.com/echo-assistant-project
 - Private repository: https://github.com/echo-assistant-project/Echo
 - main is the stable branch. Use feature/<short-name> and fix/<short-name>.
-- The founder account Akshaj-echo was previously verified as an Organization Owner.
-- The co-founder's exact GitHub username is pending. Do not invite or claim access until the username is supplied, the invitation accepted, and access checked.
+- Founder: Akshaj-echo — active organization Owner verified on 2026-10-29.
+- Co-founder: praviramc-web — exact GitHub account verified on 2026-10-29; not yet a member and no invitation is pending. The account currently has no Echo repository permission.
+- Send an organization Owner invitation only after the founder confirms. Treat access as pending until the invitation is accepted; then verify both owners and the co-founder's private repository access before claiming equal access.
 - Required reviews/rules for private repositories may depend on the GitHub plan. Treat peer review as the team's process unless the repository UI confirms enforcement. Owners/admins may change rules.
 
 ## Normal contribution

@@ -1,6 +1,6 @@
 # Echo collaboration guide
 
-This guide assumes the private organization repository, main as stable shared branch, and two founders as Owners after the co-founder invitation is accepted.
+The intended arrangement is equal Organization Owner access for founder Akshaj-echo and co-founder praviramc-web. The co-founder GitHub account is verified, but no invitation has been sent and no access is active yet. Do not describe the account as an Owner until the invitation is accepted and both organization role and private repository access are verified.
 
 ## Branch and review workflow
 
@@ -77,6 +77,8 @@ If unsure, stop and coordinate. Do not use git reset --hard or force-push to res
 
 ## Equal ownership and co-founder access
 
-Akshaj-echo is verified as an active organization Owner. The co-founder invitation awaits their exact GitHub username. Invite them with the Owner role and verify acceptance before treating access as active. Owners can change permissions, settings, visibility, or delete repos; branch rules cannot absolutely constrain Owners.
+Akshaj-echo is verified as an active organization Owner. `praviramc-web` is the verified co-founder account. Current state (2026-10-29): no organization membership, no pending invitation, and repository permission `none`. The invitation has not been sent; obtain founder confirmation immediately before sending it with the Owner role.
+
+Distinguish the stages: (1) invitation sent = pending acceptance, not active access; (2) invitation accepted = verify organization membership role `admin` (GitHub API representation of Owner) and repository permission `admin`; (3) only after both checks pass, record equal Owner access as verified. If GitHub requires an initial Member invitation, explain that constraint, wait for acceptance, then promote `praviramc-web` to Owner and verify again. Owners can change permissions, settings, visibility, or delete repos; branch rules cannot absolutely constrain Owners.
 
 Follow [docs/DEVELOPER_SETUP.md](DEVELOPER_SETUP.md). Credentials, SDK paths, models, signing keys, pairing material, and APKs stay outside Git.

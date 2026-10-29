@@ -50,7 +50,7 @@ Existing docs/FEATURE_AUDIT.md, docs/TROUBLESHOOTING.md, docs/DEVELOPER_SETUP.md
 - Backup: PASSED. F:\Downloads\EchoPhone-final-backup-20261029-192827.zip exists, 168,122 bytes, SHA-256 5879e929f9f08fb4073fed66ceab4755b4eedef4d25957ae79a5ed490002e008, matching the recorded value. Prior handoff says extraction matched commit 98eeb6e.
 - Tracked text credential scan: PASSED bounded scan; no matches for selected API key/bearer/private-key patterns. Not an exhaustive binary/remote-history audit.
 - Repository privacy/founder role: PASSED based on preceding setup session verification (private Echo repo; Akshaj-echo Owner). Current GitHub connector returned no repo details for re-verification.
-- Co-founder role: BLOCKED pending exact GitHub username and accepted invitation.
+- Co-founder status: `praviramc-web` username verified; no invitation sent or pending, membership absent, and private-repository permission is `none`; awaiting founder confirmation to send the Owner invitation.
 - Remote files: Stage 6–8 commit present at origin/feature/safe-sync-setup-ci. Stage 9 docs are local and intentionally not pushed under the current instruction.
 - History: PASSED; feature branch descends from origin/main e3c7a57; no reset, rebase, or force-push.
 - Android: PASSED on 2026-10-29. Existing Gradle 9.6.0, Android SDK 36, Android Studio Java 25; command used one worker and a 768 MB heap. testDebugUnitTest was NO-SOURCE; assembleDebug succeeded. Fresh APK: F:\Android\Build\EchoPhone\outputs\apk\debug\app-debug.apk, 22,532,672 bytes. No device install/test because phone is disconnected.
@@ -68,7 +68,7 @@ Existing docs/FEATURE_AUDIT.md, docs/TROUBLESHOOTING.md, docs/DEVELOPER_SETUP.md
 
 1. Review docs/CURRENT_STATUS.md. It contains the Stage 10 matrix and limitations.
 2. If the user approves publishing this documentation checkpoint, push the local branch and create/review a PR; only then can CI run. Until then, keep Stage 9 local.
-3. Obtain the co-founder's exact GitHub username before inviting them; verify accepted Owner access afterward.
+3. After explicit founder confirmation, invite `praviramc-web` as an Organization Owner; wait for acceptance and verify organization role plus private repository access.
 4. For sync-script safety acceptance, run the smoke tests as the Windows account that owns the F: checkout: fast-forward local main while a feature branch and an untracked edit are present, then assert feature HEAD and file bytes are unchanged. Also test dirty active main refusal, divergence refusal, fetch failure, and concurrent lock.
 5. A physical phone is not needed for documentation/build work. For Kokoro playback, phone action, microphone, or permission verification, obey the user's USB connection protocol: ask them to connect first, then verify ADB once.
 6. Do not change firewall settings, create a public endpoint, install persistent services, activate scheduled sync, invite a collaborator, or publish remotely without explicit approval.
@@ -80,4 +80,11 @@ Existing docs/FEATURE_AUDIT.md, docs/TROUBLESHOOTING.md, docs/DEVELOPER_SETUP.md
 - Disposable test suite root: `F:\Temp\EchoSyncSuite-beb971e809894d47858b8375aa9f9a1b`.
 - Results: PASS — feature branch kept checked out while local `main` ref fast-forwarded; modified tracked and untracked feature file contents remained unchanged. PASS — dirty active `main` returned exit code 2 and preserved branch, HEAD, status, tracked content, and untracked content. PASS — divergent branches returned 2 and left local `main` unchanged. PASS — concurrent lock returned 2. PASS — fetch/network failure returned 1, left HEAD unchanged, and did not log the remote URL. PASS — clean active `main` was safely declined by the running build guard and its HEAD remained unchanged.
 - The preceding PR Android CI run failed at SDK setup because `sdkmanager` was absent at the workflow's assumed path. Corrected workflow verification: PASS — GitHub Actions run 40908485725 on commit `5b4ef6f52684cb0985e5f782507bcd666fc63ca4` completed successfully on 2026-10-29. The Android SDK setup, Gradle setup, Kokoro Python syntax check, and `testDebugUnitTest assembleDebug` step all passed.
-- Scheduled synchronization remains disabled. No phone test was needed. The co-founder username remains pending.
+- Scheduled synchronization remains disabled. No phone test was needed. `praviramc-web` is verified as the co-founder account; Owner invitation is unsent pending founder confirmation.
+## Co-founder access verification — 2026-10-29
+
+- Authenticated GitHub account: `Akshaj-echo`; organization `echo-assistant-project`; founder membership active with API role `admin` (Organization Owner).
+- Repository `echo-assistant-project/Echo` verified private.
+- GitHub user `praviramc-web` exists with the exact login supplied by the founder.
+- Current membership check: `praviramc-web` is not an organization member (GitHub API 404); pending invitations list contains no invitation; repository collaborator permission is `none`.
+- No invitation has been sent. Obtain explicit founder confirmation immediately before inviting as Owner. After acceptance, verify both owners' organization roles and `praviramc-web`'s private repository permission before documenting equal access as active.

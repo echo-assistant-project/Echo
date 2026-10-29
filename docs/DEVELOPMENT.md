@@ -22,7 +22,7 @@ FreeLLMAPI is not included. The developer must run a compatible service or recei
 
 ## Clone and local paths
 
-After the co-founder is invited and accepts access:
+The co-founder account `praviramc-web` has been verified, but its organization invitation has not been sent yet. After the founder confirms the Owner invitation, and `praviramc-web` accepts it and Owner/repository access is verified:
 
     git clone https://github.com/echo-assistant-project/Echo.git
     cd Echo
