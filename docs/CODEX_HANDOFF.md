@@ -61,12 +61,13 @@ Reviewed Git status, branches, history, remotes, tracked files, project source/c
 
 ### Stage 2 — Backup and publication readiness
 
-Status: COMPLETE for local audit and backup; remote publication remains BLOCKED on destination/team details.
+Status: local audit, source checkpoint, and recoverable backup COMPLETE. GitHub setup is deferred until the organization slug and co-founder username are provided.
 
-- Backup: verified at F:\Downloads\EchoPhone-backup-20261029-191446.zip (136 entries; 115,117 bytes; SHA-256 623340d2034e0f40aeb14a00db76e79be8480b577b949e5480c0ce28fe731fdf). Fresh extraction preserved Git HEAD and all important untracked files; caches, build outputs, local.properties, and prior backups were excluded.
+- Earlier backup: F:\Downloads\EchoPhone-backup-20261029-191446.zip (136 entries; 115,117 bytes; SHA-256 623340d2034e0f40aeb14a00db76e79be8480b577b949e5480c0ce28fe731fdf).
+- Latest verified backup: F:\Downloads\EchoPhone-final-backup-20261029-192325.zip (193 entries; 175,040 bytes; SHA-256 3169f35431b13be6f67bcf82cd8176f1180fdcaee76cab556d5beb698ac3cba0). Fresh extraction matched the recorded HEAD and contained source plus Git history; caches, build outputs, local.properties, and prior backups were excluded.
 - Secret scan: completed; no high-confidence matches in current files or existing commit.
-- History: two local commits (76c92cc baseline; 6f95709 source checkpoint); no remote history.
-- Publication: NOT READY. There is no organization/repository remote. GitHub account Akshaj-echo has no existing organization membership visible to the connected GitHub integration. The co-founder’s GitHub account and desired organization name are unknown.
+- History at archive time: 76c92cc baseline; 6f95709 source checkpoint; c4138d4 handoff checkpoint. No remote history.
+- Publication: deferred by user. No organization/repository remote exists. The user will provide the organization slug and co-founder GitHub username later. Current GitHub integration cannot create organizations/repositories or invite owners.
 - Available GitHub integration does not expose create-organization, create-repository, or invite-owner operations. Do not substitute a personal public repository or push anywhere else.
 
 ## Current Git checkpoint
@@ -75,7 +76,7 @@ Status: COMPLETE for local audit and backup; remote publication remains BLOCKED 
 - Latest source checkpoint: 6f95709d7e9d1c69381bd83a8c236db52ddc1a6b
 - Commit: Add Kokoro voice host and EchoPhone hands-free flow
 - Remote: none; no source pushed
-- This handoff is being committed as a documentation-only checkpoint after the source commit.
+- Latest local checkpoint: c4138d49c5555f2ebce9882b665fb15ddf85ea0c (documentation only); no remote and nothing pushed.
 
 ## Working requirements and boundaries
 
@@ -98,9 +99,8 @@ Status: COMPLETE for local audit and backup; remote publication remains BLOCKED 
 
 ## Pending work and next action
 
-1. Create an archive outside the repository that contains the Git metadata and all important tracked/untracked project source while excluding caches and build outputs; verify the archive listing and checksum.
-2. Review exact Git diff and ignore behavior.
-3. COMPLETE: reviewed and created local checkpoint 6f95709; nothing was pushed.
-4. COMPLETE: this handoff records the verified backup and source checkpoint. Create a final post-commit archive after this handoff is committed.
-5. Ask for organization display name/slug and co-founder GitHub username. Use the GitHub web UI or an authorized organization-owner workflow for organization creation/invitation; the currently available connector cannot perform those operations.
-6. Once destination and second owner are confirmed, create a private repository and push only after a final history/working-tree scan. Do not create a personal/public substitute.
+1. COMPLETE: local audit, source checkpoint, ignore review, secret-pattern scan, and backup verification are recorded above.
+2. WAITING FOR USER: provide the GitHub organization slug and co-founder GitHub username after EchoPhone is ready.
+3. Windows desktop source is not present in this repository. Provide its location before describing the repository as the complete Android/Windows project.
+4. Phone-dependent Kokoro playback is NOT TESTED in this session because the Android phone is disconnected. Computer-based work continues without it.
+5. When the organization and co-founder details arrive, establish the private organization repository using an authorized owner workflow, then rescan history before any push. Nothing has been pushed.
