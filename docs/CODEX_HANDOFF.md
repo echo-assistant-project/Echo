@@ -72,3 +72,12 @@ Existing docs/FEATURE_AUDIT.md, docs/TROUBLESHOOTING.md, docs/DEVELOPER_SETUP.md
 4. For sync-script safety acceptance, run the smoke tests as the Windows account that owns the F: checkout: fast-forward local main while a feature branch and an untracked edit are present, then assert feature HEAD and file bytes are unchanged. Also test dirty active main refusal, divergence refusal, fetch failure, and concurrent lock.
 5. A physical phone is not needed for documentation/build work. For Kokoro playback, phone action, microphone, or permission verification, obey the user's USB connection protocol: ask them to connect first, then verify ADB once.
 6. Do not change firewall settings, create a public endpoint, install persistent services, activate scheduled sync, invite a collaborator, or publish remotely without explicit approval.
+## PR #1 follow-up — synchronization and Android CI fixes (2026-10-29)
+
+- PR: https://github.com/echo-assistant-project/Echo/pull/1 (draft; not merged).
+- The strict-mode dirty-worktree defect is fixed: Git status output is captured as an array before checking `.Count`.
+- Android CI now uses `android-actions/setup-android@v4`, which installs the SDK command-line tools, accepts the Android SDK licenses, and installs `platforms;android-36` plus `build-tools;36.0.0`. This removes the invalid hardcoded `cmdline-tools/latest` assumption.
+- Disposable test suite root: `F:\Temp\EchoSyncSuite-beb971e809894d47858b8375aa9f9a1b`.
+- Results: PASS — feature branch kept checked out while local `main` ref fast-forwarded; modified tracked and untracked feature file contents remained unchanged. PASS — dirty active `main` returned exit code 2 and preserved branch, HEAD, status, tracked content, and untracked content. PASS — divergent branches returned 2 and left local `main` unchanged. PASS — concurrent lock returned 2. PASS — fetch/network failure returned 1, left HEAD unchanged, and did not log the remote URL. PASS — clean active `main` was safely declined by the running build guard and its HEAD remained unchanged.
+- The preceding PR Android CI run failed at SDK setup because `sdkmanager` was absent at the workflow's assumed path. The corrected workflow will be verified by the run triggered by this push; do not treat that run as passed until GitHub reports success.
+- Scheduled synchronization remains disabled. No phone test was needed. The co-founder username remains pending.

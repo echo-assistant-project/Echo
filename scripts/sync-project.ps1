@@ -71,7 +71,7 @@ try {
  if($mainPath -and ((Resolve-Path -LiteralPath $mainPath).Path -ne $script:ResolvedRepo)){Stop-Sync -Outcome manual -Message "Local $Branch is checked out in another worktree. That worktree was left untouched."; return}
  if($mainPath){
   if($current -ne $Branch){Stop-Sync -Outcome manual -Message "Unexpected $Branch worktree state. No branch switched or updated."; return}
-  $dirty=Invoke-GitQuiet @('status','--porcelain','--untracked-files=normal')
+  $dirty=@(Invoke-GitQuiet @('status','--porcelain','--untracked-files=normal'))
   if($script:GitExitCode -ne 0 -or $dirty.Count -gt 0){Stop-Sync -Outcome manual -Message "Local $Branch has uncommitted changes. Files were left untouched."; return}
   $editors=@(Get-Process -Name @('Code','Code - Insiders','studio64','devenv','idea64','rider64') -ErrorAction SilentlyContinue)
   if($editors.Count -gt 0){Stop-Sync -Outcome manual -Message 'A common code editor is running. Close it and rerun to avoid refreshing open files.'; return}

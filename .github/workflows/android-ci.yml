@@ -22,16 +22,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install Android SDK packages
-        shell: bash
-        run: |
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$SDKMANAGER" ]; then
-            echo "Android SDK manager is missing from the hosted runner." >&2
-            exit 1
-          fi
-          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null
-          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --install "platforms;android-36" "build-tools;36.0.0"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
+          packages: 'platforms;android-36 build-tools;36.0.0'
       - name: Set up Gradle 9.6.0
         uses: gradle/actions/setup-gradle@v6
         with:
