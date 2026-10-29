@@ -1,110 +1,82 @@
-# Echo Collaboration Guide
+# Echo collaboration guide
 
-This guide is for a two-person team with equal organization ownership. It assumes the future repository is private and `main` is the stable shared branch.
+This guide assumes the private organization repository, main as stable shared branch, and two founders as Owners after the co-founder invitation is accepted.
 
-## Recommended branch policy
+## Branch and review workflow
 
-- `main`: stable, shared release line.
-- `feature/<short-name>`: a feature or enhancement.
-- `fix/<short-name>`: a bug fix.
-- Use pull requests for normal work. The other developer reviews and approves; the author does not approve their own pull request.
-- Keep changes focused. Add required CI checks only after the Android and Windows build workflows exist and run reliably.
-- Do not force-push shared branches. Avoid history-rewriting recovery commands unless the other developer has coordinated with you.
+- main is the stable shared line.
+- Use feature/<short-name> for features and fix/<short-name> for bug fixes.
+- Open a pull request for normal changes. The other developer reviews; authors do not approve their own PR.
+- Merge after review and checks pass. Do not force-push shared branches.
+- The private repo is on GitHub Free. Required branch protection/reviews for private repos need a paid plan; on Free this review policy is a team agreement, not an enforced rule. See [GitHub protected branch plan availability](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches).
 
-Suggested `main` protection for a two-person team: require a pull request, one approval from the other developer, resolve conversations, block force-push and deletion, and dismiss stale approvals when new commits are pushed. Do not require status checks until those checks have been configured and verified.
+## Safe manual synchronization
 
-### GitHub plan limitation
+From the repository root in PowerShell:
 
-GitHub Free organizations support private repositories. GitHub documents protected branches for Free organizations on public repositories; private repository branch protection and rulesets require a paid plan such as GitHub Team. GitHub Team currently lists at USD $4 per user per month, so two billed members would be about USD $8/month before taxes or billing adjustments. Verify the plan and pricing again before purchase. If staying on Free, use the same PR/review convention manually, but GitHub cannot enforce it on a private repository through those protections. See [GitHub plans and pricing](https://github.com/pricing), [protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches), and [ruleset availability](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository).
+    .\scripts\sync-project.ps1
 
-Organization owners have full administrative access. Even when a rule says PR/review required, owners or admins may have bypass paths depending on configuration; an owner can also change the rules. Rules reduce accidents, they do not create an absolute lock against both owners.
+It fetches origin/main then fast-forwards local main only when safe. It never switches branches. With a feature branch active, it updates only local main's ref, leaving the feature branch and working files untouched. When main is checked out, it refuses to update if the tree is dirty, a common editor/build is open, or history cannot fast-forward. Diverged history or uncertainty requires manual review.
 
-## Everyday Git workflow (PowerShell)
+Fetch only, without advancing local main:
 
-Run these commands from the local Echo repository root after the private remote has been configured.
+    .\scripts\sync-project.ps1 -FetchOnly
 
-### Start or update work
+Assess without applying a fast-forward:
 
-```powershell
-git switch main
-git pull --ff-only origin main
-git switch -c feature/short-description
-```
+    .\scripts\sync-project.ps1 -WhatIf
 
-Use `fix/short-description` for a bug fix. Choose a unique, lowercase branch name with hyphens.
+The default log is %LOCALAPPDATA%\Echo\logs\sync-project.log. It records timestamps, branch, and outcome only. It omits remote URLs, Git output, and credentials.
 
-### Review and commit your changes
+Git does not synchronize uncommitted edits. Save, commit, and push changes before expecting them on another PC. Save/close editors before updating their active main.
 
-```powershell
-git status --short
-git diff
-git add path\to\changed-file
-git diff --cached
-git commit -m "Describe the change"
-```
+### Optional Windows Task Scheduler
 
-Check `git diff` before staging. Check `git diff --cached` before committing. Do not add local configuration, API keys, certificates, model files, APKs, Gradle caches, or machine-specific SDK paths containing private information.
+No task is installed or enabled. Manual synchronization is recommended because background updates can change files under active development.
 
-### Push your branch and open a pull request
+For a future fetch-only check, configure Task Scheduler to run only while the developer is logged in, start after an idle delay, and invoke:
 
-```powershell
-git push -u origin feature/short-description
-gh pr create --base main --head feature/short-description --fill
-```
+    pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "C:\path\to\Echo\scripts\sync-project.ps1" -FetchOnly
 
-`gh` is optional; you can create the pull request in the GitHub website instead. Never paste passwords or personal access tokens into chat. Authenticate with the official browser/device flow from GitHub CLI or Git Credential Manager.
+Replace the path with that PC's clone. Fetch-only updates remote-tracking metadata but never changes a local branch or working file. Avoid scheduled fast-forwards because an open editor may retain stale buffers. The script never merges PRs.
 
-### Review and merge
+## Everyday Git workflow
 
-```powershell
-gh pr checkout 123
-gh pr diff 123
-gh pr review 123 --approve
-```
+From a clean tree:
 
-Replace `123` with the pull request number. For review, inspect the changed files and build/test evidence, then approve or request changes. The reviewer should not approve their own changes. After approval and successful checks, merge in GitHub or with `gh pr merge 123`.
+    .\scripts\sync-project.ps1
+    git switch -c feature/short-description
 
-### Resolve conflicts safely
+After editing:
 
-First update your feature branch from `main`:
+    git status --short
+    git diff
+    git add path\to\changed-file
+    git diff --cached
+    git commit -m "Describe the change"
+    git push -u origin feature/short-description
 
-```powershell
-git fetch origin
-git switch feature/short-description
-git merge origin/main
-```
+Create a pull request with base main. After the other founder reviews it and checks pass, merge on GitHub and synchronize local main.
 
-Open each conflicted file, decide the intended combined content, then:
+Resolve conflicts by inspecting and editing both sides intentionally:
 
-```powershell
-git status --short
-git add path\to\resolved-file
-git commit
-git push
-```
+    git status --short
+    # Edit each conflict by hand.
+    git add path\to\resolved-file
+    git commit
+    git push
 
-If the result is unclear, stop before committing and ask the other developer. Do not use `git reset --hard` or force-push as a conflict shortcut.
+If unsure, stop and coordinate. Do not use git reset --hard or force-push to resolve conflicts.
 
-### Update the local main branch
+## Recover safely
 
-```powershell
-git switch main
-git pull --ff-only origin main
-```
+- Inspect git diff before changing unstaged edits.
+- Unstage while keeping files: git restore --staged path\to\file.
+- Undo a pushed change with a revert commit: git revert <commit>.
+- Before recovery, make a backup branch/copy and coordinate.
 
-### Recover from common mistakes
+## Equal ownership and co-founder access
 
-- Wrong branch, no changes yet: `git switch main` and create the intended branch.
-- Accidentally staged a file but did not commit: inspect `git status`, then unstage it with `git restore --staged path\to\file`. The working copy remains.
-- Need to discard unstaged edits: inspect `git diff` first. `git restore path\to\file` permanently discards those edits; use only when you are certain.
-- A commit was made but not pushed: make a correcting commit. If removing the commit is necessary, coordinate first and preserve a backup branch before changing history.
-- A bad commit was already pushed/shared: use `git revert <commit>` to make a new undo commit, then push normally. Do not reset or force-push shared history.
-- Unsure what Git will do: stop and inspect `git status`, `git log --oneline --decorate -8`, and `git diff` before running a mutating command.
+Akshaj-echo is verified as an active organization Owner. The co-founder invitation awaits their exact GitHub username. Invite them with the Owner role and verify acceptance before treating access as active. Owners can change permissions, settings, visibility, or delete repos; branch rules cannot absolutely constrain Owners.
 
-## Equal ownership and invitations
-
-Both founders should be organization Owners and verify the accepted invitation before treating access as active. GitHub describes Owners as having complete administrative access and recommends at least two owners for continuity ([organization roles](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization), [ownership continuity](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/maintaining-ownership-continuity-for-your-organization)). Owners have equal administrative access, including the ability to change organization settings, repository rules, roles, visibility, or delete repositories. Keep recovery codes and account security under each person's control; never share sign-in credentials.
-
-## Setup remains pending
-
-No organization, repository, remote, invitations, or upload has been created. The organization name/slug, repository name, co-founder login, and approved upload scope must be confirmed first. This local GitHub connection can inspect accessible repositories but has no organization creation, repository creation, or owner-invitation operation. GitHub CLI is not installed on this PC at audit time.
+Follow [docs/DEVELOPER_SETUP.md](DEVELOPER_SETUP.md). Credentials, SDK paths, models, signing keys, pairing material, and APKs stay outside Git.

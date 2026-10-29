@@ -1,21 +1,32 @@
 # EchoPhone
 
-EchoPhone has two distinct flows today: the launcher screen performs local phone actions (launch apps and open the dialer or messaging app for confirmation), while the separate orb preview contains the FreeLLMAPI chat client.
+EchoPhone is the Android app in the Echo project. The repository also contains the optional Windows Kokoro speech service. FreeLLMAPI and EchoDesktop are external/not currently included.
 
-See docs/ARCHITECTURE.md, docs/FEATURE_AUDIT.md, and docs/TROUBLESHOOTING.md for the verified project state.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Feature audit](docs/FEATURE_AUDIT.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Setup for another Windows PC](docs/DEVELOPER_SETUP.md)
+- [Collaboration and synchronization](docs/COLLABORATION_GUIDE.md)
+- [Unified repository design](docs/UNIFIED_REPOSITORY_DESIGN.md)
 
-## Build
+## Quick build
 
-The project has no Gradle wrapper. The existing Windows setup script uses F: paths for the Android SDK, Gradle cache, temp files, and build output; it also changes persistent user environment variables and may install SDK/JDK packages. Review it before running. A direct Gradle build can use those paths via process-only environment variables.
+Copy scripts/echo-env.example.ps1 to .echo-env.ps1, edit local paths, and load in PowerShell:
 
-## FreeLLMAPI connection
+    Copy-Item scripts\echo-env.example.ps1 .echo-env.ps1
+    . .\.echo-env.ps1
+    .\Setup-Build-Deploy.ps1
 
-The installed FreeLLMAPI UI bundle documents an OpenAI-compatible Chat Completions API (/v1/chat/completions) using Authorization: Bearer <API key>. Echo expects the configured base URL to end in /v1 and sends model auto. The port/interface address must come from the running FreeLLMAPI settings. During the audit on this PC, the service listened only on loopback port 31415, so another device could not reach it over Wi-Fi. See docs/TROUBLESHOOTING.md.
+The setup script provisions Android SDK, Java 17, and Gradle under selected paths. It does not persist Windows environment variables unless explicitly run with -PersistEnvironment. See the developer setup guide.
 
-## Local model
+## Safe synchronization
 
-The app does not bundle or download a model. MediaPipe LLM Inference expects a compatible task-bundle model (typically .task); arbitrary GGUF or ordinary .bin files are not interchangeable. The model has not been imported or tested on the connected phone. Google currently marks MediaPipe LLM Inference as maintenance-only and recommends LiteRT-LM for new Android work.
+Run from the repository root:
 
-## Repository design and collaboration
+    .\scripts\sync-project.ps1
 
-The current checkout is the working EchoPhone Android project. The unified repository plan and two-founder Git workflow are documented in [docs/UNIFIED_REPOSITORY_DESIGN.md](docs/UNIFIED_REPOSITORY_DESIGN.md) and [docs/COLLABORATION_GUIDE.md](docs/COLLABORATION_GUIDE.md). The proposed monorepo migration is deferred until the actual EchoDesktop source is available and a path-safe migration is approved.
+This fetches origin/main and fast-forwards local main only when safe. It never switches branches, changes an active feature branch, overwrites uncommitted edits, force-resets, force-pushes, resolves conflicts, or merges PRs. Use -FetchOnly for scheduled background checks. Git transfers commits, not uncommitted edits.
+
+## AI and voice configuration
+
+Each developer configures their own FreeLLMAPI access and local app settings. Kokoro models, TLS private keys, bearer keys, and pairing data are generated per PC and never committed.
