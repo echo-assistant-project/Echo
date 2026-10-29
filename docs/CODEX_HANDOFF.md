@@ -32,7 +32,7 @@ Safety: Local repository only. No source has been pushed or published. No creden
 - Tests: no test source tree or automated test suite found.
 - Co-founder build prerequisites: Android Studio/JDK 17+, Android SDK platform 36/build-tools 36, Gradle 9.6; Kokoro host additionally requires Python 3.12, kokoro-onnx dependencies, and externally downloaded model/voice assets.
 - Windows desktop source: none found under this project root. A later unified Android/Desktop repository needs the desktop source supplied or identified before claiming it contains the full ecosystem.
-- Git: two local commits after the current checkpoint (baseline 76c92cc and source checkpoint 6f95709); no remote.
+- Git at Stage 3 audit: local-only history through 98eeb6e; no remote.
 
 ### Actual verification recorded
 
@@ -64,7 +64,7 @@ Reviewed Git status, branches, history, remotes, tracked files, project source/c
 Status: local audit, source checkpoint, and recoverable backup COMPLETE. GitHub setup is deferred until the organization slug and co-founder username are provided.
 
 - Earlier backup: F:\Downloads\EchoPhone-backup-20261029-191446.zip (136 entries; 115,117 bytes; SHA-256 623340d2034e0f40aeb14a00db76e79be8480b577b949e5480c0ce28fe731fdf).
-- Latest verified backup: F:\Downloads\EchoPhone-final-backup-20261029-192325.zip (193 entries; 175,040 bytes; SHA-256 3169f35431b13be6f67bcf82cd8176f1180fdcaee76cab556d5beb698ac3cba0). Fresh extraction matched the recorded HEAD and contained source plus Git history; caches, build outputs, local.properties, and prior backups were excluded.
+- Latest verified backup: F:\Downloads\EchoPhone-final-backup-20261029-192827.zip (121 entries; 168,122 bytes; SHA-256 5879e929f9f08fb4073fed66ceab4755b4eedef4d25957ae79a5ed490002e008). Fresh extraction matched HEAD 98eeb6e and included source plus Git history; generated build/cache directories and local.properties were excluded.
 - Secret scan: completed; no high-confidence matches in current files or existing commit.
 - History at archive time: 76c92cc baseline; 6f95709 source checkpoint; c4138d4 handoff checkpoint. No remote history.
 - Publication: deferred by user. No organization/repository remote exists. The user will provide the organization slug and co-founder GitHub username later. Current GitHub integration cannot create organizations/repositories or invite owners.
@@ -76,7 +76,7 @@ Status: local audit, source checkpoint, and recoverable backup COMPLETE. GitHub 
 - Latest source checkpoint: 6f95709d7e9d1c69381bd83a8c236db52ddc1a6b
 - Commit: Add Kokoro voice host and EchoPhone hands-free flow
 - Remote: none; no source pushed
-- Latest local checkpoint: c4138d49c5555f2ebce9882b665fb15ddf85ea0c (documentation only); no remote and nothing pushed.
+- Latest local checkpoint: 98eeb6eda58e5f9fdf26c10c7908284654984d87 (documentation only); no remote and nothing pushed.
 
 ## Working requirements and boundaries
 
@@ -101,6 +101,6 @@ Status: local audit, source checkpoint, and recoverable backup COMPLETE. GitHub 
 
 1. COMPLETE: local audit, source checkpoint, ignore review, secret-pattern scan, and backup verification are recorded above.
 2. WAITING FOR USER: provide the GitHub organization slug and co-founder GitHub username after EchoPhone is ready.
-3. Windows desktop source is not present in this repository. Provide its location before describing the repository as the complete Android/Windows project.
+3. COMPLETE: Stage 3 monorepo design and Stage 5 collaboration instructions are documented in docs/UNIFIED_REPOSITORY_DESIGN.md and docs/COLLABORATION_GUIDE.md. No source was moved. Windows desktop source is still absent.
 4. Phone-dependent Kokoro playback is NOT TESTED in this session because the Android phone is disconnected. Computer-based work continues without it.
-5. When the organization and co-founder details arrive, establish the private organization repository using an authorized owner workflow, then rescan history before any push. Nothing has been pushed.
+5. WAITING FOR USER APPROVAL: confirm organization display name/slug, repository name, private visibility, founder and co-founder GitHub logins, and exact initial upload scope before any GitHub creation or push.

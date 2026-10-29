@@ -15,3 +15,7 @@ The installed FreeLLMAPI UI bundle documents an OpenAI-compatible Chat Completio
 ## Local model
 
 The app does not bundle or download a model. MediaPipe LLM Inference expects a compatible task-bundle model (typically .task); arbitrary GGUF or ordinary .bin files are not interchangeable. The model has not been imported or tested on the connected phone. Google currently marks MediaPipe LLM Inference as maintenance-only and recommends LiteRT-LM for new Android work.
+
+## Repository design and collaboration
+
+The current checkout is the working EchoPhone Android project. The unified repository plan and two-founder Git workflow are documented in [docs/UNIFIED_REPOSITORY_DESIGN.md](docs/UNIFIED_REPOSITORY_DESIGN.md) and [docs/COLLABORATION_GUIDE.md](docs/COLLABORATION_GUIDE.md). The proposed monorepo migration is deferred until the actual EchoDesktop source is available and a path-safe migration is approved.
