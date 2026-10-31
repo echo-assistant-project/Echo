@@ -57,3 +57,7 @@ node_modules/
 
 # Local audit backups
 *.backup*
+
+# Developer-local path configuration
+.echo-env.ps1
+.echo-env.local.ps1
