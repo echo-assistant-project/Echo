@@ -310,17 +310,29 @@ class ChatClient:
                 if text:
                     yield text
                 return
-            got_any = False
+            completed = False
+            received = 0
+            deadline = time.monotonic() + timeout
             try:
                 while True:
-                    line = response.readline()
+                    if time.monotonic() >= deadline:
+                        raise LlmError("FreeLLMAPI stream exceeded its time limit.")
+                    if conn.sock is not None:
+                        conn.sock.settimeout(max(0.1, deadline - time.monotonic()))
+                    line = response.readline(65537)
                     if not line:
+                        if not completed:
+                            raise LlmError("FreeLLMAPI stream ended before completion.")
                         break
+                    received += len(line)
+                    if len(line) > 65536 or received > 2 * 1024 * 1024:
+                        raise LlmError("FreeLLMAPI stream exceeded its size limit.")
                     line = line.strip()
                     if not line.startswith(b"data:"):
                         continue
                     data = line[5:].strip()
                     if data == b"[DONE]":
+                        completed = True
                         break
                     try:
                         obj = json.loads(data)
@@ -330,21 +342,20 @@ class ChatClient:
                         raise classify(0, str(obj["error"]))
                     try:
                         delta = obj["choices"][0].get("delta") or obj["choices"][0].get("message") or {}
+                        if obj["choices"][0].get("finish_reason") is not None:
+                            completed = True
                     except (KeyError, IndexError, TypeError, AttributeError):
                         continue
                     for tc in (delta.get("tool_calls") or []) if isinstance(delta, dict) else []:
                         fn = tc.get("function") or {}
-                        got_any = True
                         yield ToolDelta((tc.get("index", 0), tc.get("id", ""), fn.get("name", ""), _args_text(fn.get("arguments"))))
                     piece = delta.get("content") if isinstance(delta, dict) else None
                     if isinstance(piece, list):
                         piece = "".join(p.get("text", "") for p in piece if isinstance(p, dict))
                     if piece:
-                        got_any = True
                         yield piece
             except (OSError, http.client.HTTPException) as e:
-                if not got_any:
-                    raise LlmError(f"FreeLLMAPI stopped answering: {e}") from None
+                raise LlmError(f"FreeLLMAPI stopped answering: {e}") from None
         finally:
             conn.close()
 
