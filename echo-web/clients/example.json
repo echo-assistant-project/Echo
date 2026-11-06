@@ -1,0 +1,16 @@
+[
+  {
+    "site_id": "demo",
+    "branding": {
+      "name": "Example Shop",
+      "accent": "#167089",
+      "greeting": "Hello! Ask about our opening hours or delivery."
+    },
+    "allowed_origins": ["http://127.0.0.1:8765", "http://localhost:8765", "https://www.example.com"],
+    "enabled_capabilities": ["chat"],
+    "knowledge": [
+      {"id": "hours", "title": "Opening hours", "text": "Example Shop is open Monday to Friday, 9 am to 5 pm. It is closed on weekends."},
+      {"id": "delivery", "title": "Delivery policy", "text": "Example Shop offers standard delivery in 3 to 5 business days. Delivery prices require a quote from the shop."}
+    ]
+  }
+]
