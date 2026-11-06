@@ -1,44 +1,60 @@
-# EchoPhone Architecture
+# Echo architecture
 
-Audit date: 2026-10-29
+Audit: 2026-10-29. This describes the checkout at feature/safe-sync-setup-ci and distinguishes source that exists from integrations that have not been verified.
 
-## Build and app flow
+## System map
 
-- Android application ID: com.echo.assistant.
-- MainActivity is the launcher and exposes standalone phone actions.
-- FloatingOrbComposeActivity contains the Compose orb, chat with AssistantManager, voice settings, and continuous foreground voice loop.
-- The debug app uses Android Gradle Plugin 9.4.1, Kotlin Compose plugin 2.2.10, compile SDK 36, target SDK 35, minimum SDK 26.
-- The debug APK is built to F:\Android\Build\EchoPhone\outputs\apk\debug\app-debug.apk. Android SDK, Gradle home, temp, and build output are on F:.
-- The project has no Gradle wrapper; use the existing Gradle installation with process-scoped paths rather than the setup script that changes persistent environment variables.
+    User
+      |
+      v
+    EchoPhone (MainActivity + Compose orb)
+      |-- PhoneActionRouter --> Android intents
+      |-- Android SpeechRecognizer
+      |-- AssistantManager --> external FreeLLMAPI
+      |                       \-> optional imported MediaPipe model
+      |-- KokoroVoiceClient -- HTTPS, bearer, certificate pin
+                               |
+                               +-- ADB reverse for USB
+                                     |
+                                     v
+                           Windows Kokoro host (loopback:31416)
+                                     |
+                                     v
+                         Kokoro-82M af_heart ONNX assets
+      \-- Android TextToSpeech fallback
 
-## AI request path
+## Android architecture
 
-- AssistantManager sends non-streaming OpenAI-compatible requests to the saved FreeLLMAPI URL, normally http://127.0.0.1:31415/v1, with model auto, messages, and an optional Bearer key.
-- It probes and chats against the same validated /v1 base and reports HTML/non-JSON responses without attempting unsafe JSON parsing.
-- Recent conversation turns are kept in memory for follow-up questions. The existing FreeLLMAPI integration is unchanged by the voice update.
-- USB access requires ADB reverse forwarding for tcp:31415. The connection is local to the PC and USB route; do not expose the API publicly.
-- The optional local MediaPipe inference path requires a compatible user-selected model. No model is bundled or downloaded by EchoPhone.
+- MainActivity.java is the app launcher and provides standalone phone controls. It can launch apps, look up a contact, open the dialer, and prepare a message draft. Placing a call or sending a message still requires the user to act in Android system UI.
+- FloatingOrbComposeActivity.kt implements the Compose orb, conversation UI, voice settings, speech recognition loop, and response playback. The user starts and stops a foreground listening session; this is not always-on wake-word recognition.
+- AssistantManager.kt probes the configured /v1/models endpoint and sends non-streaming OpenAI-compatible /v1/chat/completions requests with model auto. Recent turns are held in app memory for context. If remote AI is unavailable, an imported compatible MediaPipe model can answer text requests. No local model is bundled.
+- PhoneActionRouter.kt maps a limited set of explicit phrases to Android intents for installed apps, websites, Google search, YouTube search, and Spotify search. Model prose is not executed as code.
+- ScreenAwarenessService.kt is an opt-in Android accessibility service. It reads visible UI text into an in-memory field on the device. The current chat path does not send that text to the model, and the service does not capture screenshots.
+- WakeWordService.kt is a notification-only scaffold. It does not listen for or detect a wake word.
 
-## Speech output: Kokoro default
+## Windows-side architecture
 
-- Default voice in the orb chat is Kokoro-82M voice af_heart. The model runs on the Windows PC in a local Python ONNX Runtime service. Android receives WAV audio and plays it.
-- Model files are stored outside the repository at F:\Android\KokoroVoice\models. The int8 ONNX file is 114,119,327 bytes and the voice pack is 28,214,398 bytes. Both are SHA-256 checked by Setup-KokoroVoice.ps1.
-- The voice host binds only to 127.0.0.1:31416, requires a random Bearer token, uses TLS, and only accepts synthesis requests at /v1/tts. It does not expose a router-facing network listener.
-- Android pins the server certificate SHA-256, validates the allowed loopback endpoint, stores the Bearer key encrypted using Android Keystore, validates the WAV response, and falls back to the selected Android system TTS voice if Kokoro is unavailable.
-- Voice credentials are created in F:\Android\EchoVoice\pairing.txt. Setup applies a per-file ACL granting access only to the current Windows user. Treat that file as private.
-- USB access requires ADB reverse tcp:31416. The Android app must be paired by entering the endpoint, Bearer key, and certificate fingerprint into the orb voice settings.
-- The basic MainActivity standalone controls still use Android TextToSpeech; Kokoro is the default for spoken chat replies in the orb activity. Android speech recognition remains the phone's system recognition service.
-- Actual Kokoro inference and the authenticated TLS WAV endpoint have been tested on the PC. Phone-side audio playback has not yet been verified because voice credentials still need to be entered in the phone UI.
+There is no EchoDesktop application or .sln/.csproj in this checkout. The PC-side component here is the optional Kokoro voice host:
 
-## Voice conversation and phone actions
+- tools/KokoroVoice/server.py loads kokoro-onnx and listens on 127.0.0.1:31416.
+- Run-KokoroVoiceHost.ps1 loads local model paths, TLS files, and a bearer token into the process environment, then starts Python.
+- Setup-KokoroVoice.ps1 installs the isolated Python environment and downloads/checks Kokoro assets when absent. It creates local TLS/pairing material outside the repository and restricts its ACL.
+- The service accepts authenticated /v1/tts POST requests and returns WAV audio. It is not an AI chat backend and does not expose a router-facing listener.
 
-- The orb supports tap-to-start continuous foreground speech recognition, visible transcripts, chat responses, stop control, and restart listening after the reply.
-- PhoneActionRouter accepts explicit allow-listed requests for opening apps, websites, Google search, YouTube search, and Spotify search. It does not execute arbitrary model text.
-- MainActivity supports app opening, contact lookup, opening the dialer, and preparing a message draft. Calls and texts require the user's final action in Android's own app.
-- Background wake-word listening is not implemented or claimed.
+## AI/backend architecture
 
-## Other existing components
+- FreeLLMAPI is external and is neither included nor started by this repository. EchoPhone normally uses an endpoint ending in /v1, often http://127.0.0.1:31415/v1.
+- On a USB-connected phone, adb reverse tcp:31415 tcp:31415 makes the phone loopback port reach the PC service. Port forwarding and service startup are separate.
+- The Android app also has a MediaPipe LLM Inference code path. It requires a compatible model file imported onto the device. Without that file, offline AI chat is unavailable.
+- No backend gateway, hosted API, account service, or model distribution service exists in this repository.
 
-- WakeWordService remains a notification-only scaffold.
-- ScreenAwarenessService is an opt-in accessibility service that collects visible node text; it is not wired into the current LLM message path and does not take screenshots.
-- No Windows backend source is part of the Android project. The Kokoro local voice host is the only new PC-side companion component.
+## Speech and action flow
+
+1. Android system SpeechRecognizer converts foreground speech to text.
+2. The orb first checks whether an explicit allow-listed phone action matches.
+3. Otherwise the request goes to AssistantManager and FreeLLMAPI, or to an imported local MediaPipe model when remote AI is unavailable.
+4. For spoken replies, the default orb voice is Kokoro af_heart on the paired PC. The phone calls the authenticated HTTPS service through ADB reverse and validates the pinned certificate and WAV response.
+5. If Kokoro is unavailable, the orb falls back to the selected Android TextToSpeech voice. The standalone launcher also uses Android TextToSpeech.
+6. After a reply, the foreground conversation loop can resume listening while the session remains active.
+
+Kokoro model files total about 143 MB and are not tracked. Each PC needs its own Python environment, model assets, certificate, bearer token, and pairing configuration.
