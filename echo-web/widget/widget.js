@@ -33,7 +33,8 @@
     <section class="panel" id="echo-panel" role="dialog" aria-label="Website assistant" hidden>
       <header><h2>Website assistant</h2><button class="plain reset" type="button">New chat</button><button class="plain close" type="button" aria-label="Close chat">✕</button></header>
       <div class="messages" role="log" aria-live="polite" aria-relevant="additions text"></div>
-      <div class="status" role="status"></div>
+      <div class="status" role="status">Connecting…</div>
+      <button class="plain retry" type="button" hidden>Retry message</button>
       <form><textarea aria-label="Your message" placeholder="Ask a question…" maxlength="4000" rows="2" required></textarea><button class="send" type="submit">Send</button></form>
       <div class="footer">AI answers can be mistaken. Confirm important details with the business.</div>
     </section>`;
@@ -47,10 +48,12 @@
   const input = shadow.querySelector("textarea");
   const send = shadow.querySelector(".send");
   const reset = shadow.querySelector(".reset");
+  const retry = shadow.querySelector(".retry");
   let token = null;
   let busy = false;
   let config = null;
   let controller = null;
+  let failedTurn = null;
 
   function bubble(role, text) {
     const element = document.createElement("div");
@@ -65,6 +68,7 @@
     send.disabled = value || !config;
     input.disabled = value || !config;
     reset.disabled = value || !config;
+    retry.disabled = value || !failedTurn || !config;
   }
   function close() {
     panel.hidden = true;
@@ -102,6 +106,8 @@
     try {
       if (token) await request("/sessions/current", { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       token = null;
+      failedTurn = null;
+      retry.hidden = true;
       log.replaceChildren();
       bubble("assistant", config.branding.greeting);
       status.textContent = "New conversation.";
@@ -109,14 +115,14 @@
     finally { setBusy(false); input.focus(); }
   });
 
-  shadow.querySelector("form").addEventListener("submit", async event => {
-    event.preventDefault();
-    const message = input.value.trim();
+  async function sendMessage(message, existingAnswer = null) {
     if (busy || !config || !message) return;
     setBusy(true);
-    bubble("user", message);
-    input.value = "";
-    const answer = bubble("assistant", "");
+    failedTurn = null;
+    retry.hidden = true;
+    const answer = existingAnswer || bubble("assistant", "");
+    if (!existingAnswer) bubble("user", message).before(answer);
+    answer.textContent = "";
     status.textContent = "Thinking…";
     controller = new AbortController();
     let reader = null;
@@ -165,12 +171,27 @@
     } catch (error) {
       status.textContent = error.name === "AbortError" ? "Reply stopped." : error.message;
       if (!answer.textContent) answer.textContent = "This reply could not be completed. Please try again.";
+      failedTurn = { message, answer };
+      retry.hidden = false;
     } finally {
       if (reader) { await reader.cancel().catch(() => {}); reader.releaseLock(); }
       controller = null;
       setBusy(false);
       if (!panel.hidden) input.focus();
     }
+  }
+  shadow.querySelector("form").addEventListener("submit", event => {
+    event.preventDefault();
+    const message = input.value.trim();
+    if (!busy && config && message) {
+      input.value = "";
+      sendMessage(message);
+    }
+  });
+  retry.addEventListener("click", () => {
+    if (!failedTurn || busy) return;
+    const turn = failedTurn;
+    sendMessage(turn.message, turn.answer);
   });
   window.addEventListener("pagehide", () => controller?.abort());
   setBusy(false);

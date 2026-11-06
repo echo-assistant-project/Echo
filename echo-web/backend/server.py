@@ -148,6 +148,10 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         if path == '/health':
             return self._json(200, {'status': 'ok'})
+        if path == '/ready':
+            if not self.server.clients:
+                return self._json(503, {'status': 'unavailable'})
+            return self._json(200, {'status': 'ready'})
         if path in ('/widget.js', '/demo', '/demo/'):
             file = ROOT / 'widget' / ('widget.js' if path == '/widget.js' else 'demo.html')
             body = file.read_bytes()

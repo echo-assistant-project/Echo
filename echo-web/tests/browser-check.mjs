@@ -61,6 +61,11 @@ try {
   await widget.locator(".status").filter({ hasText: "could not complete" }).waitFor();
   assert.equal(await widget.locator(".send").isEnabled(), true);
   assert.equal((await widget.locator(".status").textContent()).includes("private-error"), false);
+  const userMessagesBeforeRetry = await widget.locator(".user").count();
+  await widget.locator(".retry").click();
+  await widget.locator(".status").filter({ hasText: "Ready." }).waitFor();
+  assert.equal(await widget.locator(".user").count(), userMessagesBeforeRetry);
+  assert.match(await widget.locator(".assistant").last().textContent(), /Reply: fail/);
   await widget.locator(".reset").click();
   await widget.locator(".status").filter({ hasText: "New conversation" }).waitFor();
   await send("follow-up");

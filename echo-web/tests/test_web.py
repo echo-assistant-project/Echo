@@ -132,6 +132,22 @@ class ApiTests(unittest.TestCase):
         self.assertIn('Authorization', headers['Access-Control-Allow-Headers'])
         self.assertNotEqual('*', headers['Access-Control-Allow-Origin'])
 
+    def test_health_and_readiness_do_not_disclose_configuration(self):
+        connection = http.client.HTTPConnection(*self.server.server_address, timeout=5)
+        connection.request('GET', '/health')
+        response = connection.getresponse()
+        self.assertEqual((200, {'status': 'ok'}), (response.status, json.loads(response.read())))
+        connection.request('GET', '/ready')
+        response = connection.getresponse()
+        self.assertEqual((200, {'status': 'ready'}), (response.status, json.loads(response.read())))
+        connection.close()
+        self.server.clients = {}
+        connection = http.client.HTTPConnection(*self.server.server_address, timeout=5)
+        connection.request('GET', '/ready')
+        response = connection.getresponse()
+        self.assertEqual((503, {'status': 'unavailable'}), (response.status, json.loads(response.read())))
+        connection.close()
+
     def test_arbitrary_tools_and_oversized_messages_are_rejected(self):
         token = self.session()
         for body in ({'message': 'Hello', 'tools': ['shell']}, {'message': 'x' * 4001}, {'message': []}, {'prompt': 'override'}):

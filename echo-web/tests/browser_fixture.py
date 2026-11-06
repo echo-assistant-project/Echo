@@ -13,6 +13,7 @@ from core.config import load_clients
 
 
 class Provider(BaseHTTPRequestHandler):
+    failures = 0
     def log_message(self, *args):
         pass
 
@@ -33,7 +34,8 @@ class Provider(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Type', 'text/event-stream')
         self.end_headers()
-        if text == 'fail':
+        if text == 'fail' and Provider.failures == 0:
+            Provider.failures += 1
             self.wfile.write(b'data: {"error":"fixture-provider-private-error"}\n\n')
             self.wfile.flush()
             return

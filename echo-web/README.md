@@ -21,6 +21,9 @@ The default provider configuration uses an already-running FreeLLMAPI service. F
 OpenAI-compatible `/v1` service reachable from that host and a model/route it supports. A client website cannot
 reach a developer laptop's loopback address. This web service never starts that service or any desktop app.
 
+`GET /health` reports that the process is alive. `GET /ready` reports whether the server has at least one loaded
+client configuration. Neither endpoint tests the model provider or returns configuration, credentials, or client data.
+
 ## Embed
 
 After provisioning a client and a staging API host, add this near the end of the client's HTML body:
@@ -40,6 +43,8 @@ knowledge passages. Keep actual configuration in `clients/private/` or in a sepa
 
 The widget uses Shadow DOM, plain text rendering, and in-memory session tokens. It has no build step, external fonts,
 browser storage, microphone access, speech output, or device automation. A page reload starts a new visitor session.
+While it is open, the widget says whether it is connecting, ready, responding, or unavailable. A failed reply can be
+retried in place without adding another user message or committing an incomplete turn.
 
 ## Checks
 
