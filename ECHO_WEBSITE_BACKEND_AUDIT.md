@@ -112,5 +112,6 @@ Open `http://127.0.0.1:8765/demo` on the laptop. Use `Ctrl+C` to stop it. The re
 
 ## Git status
 
-No deployment or merge was performed. Before a push, review the final diff and confirm no `.env`, local data, API
-keys, logs, binaries, or device-specific files are included.
+No deployment or merge was performed. The verified audit branch is `codex/website-backend-audit`; commit
+`560b6d3469283990d520607a014fee6760098a69` was pushed to its matching GitHub branch. The working tree was clean
+after the push. No `.env`, local data, API keys, logs, binaries, or device-specific files were committed.
