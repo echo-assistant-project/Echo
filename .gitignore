@@ -26,6 +26,8 @@ node_modules/
 **/credentials.yaml
 **/credentials.yml
 **/pairing.txt
+**/pairing.json
+**/secrets.bin
 **/api-key.txt
 **/server-key.pem
 **/server-cert.pem
@@ -52,6 +54,7 @@ node_modules/
 *.wav
 *.apk
 *.aab
+*.pyz
 *.tmp
 *.log
 

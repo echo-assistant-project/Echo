@@ -1,37 +1,37 @@
 # Echo
 
-Echo is a cross-device assistant project. This repository currently contains EchoPhone for Android and an optional Windows Kokoro voice host. It does not contain EchoDesktop, FreeLLMAPI, or a bundled language model.
+Echo combines a Windows assistant, an Android app, and a browser chat integration. The Windows source in this repository comes from the Deluxe handoff. The existing Android source and web integration remain separately maintained components. See [the import notes](docs/DELUXE_IMPORT.md) for version boundaries and verification.
 
-EchoPhone combines an Android Compose interface, an OpenAI-compatible FreeLLMAPI client, optional MediaPipe local text inference, Android speech recognition, and spoken replies through Kokoro-82M af_heart on a paired Windows PC or Android TextToSpeech fallback.
+| Component | Source | Start here |
+| --- | --- | --- |
+| Windows desktop | `desktop/EchoDesktop/` | [Desktop README](desktop/EchoDesktop/README.md) |
+| Android | `app/` | [Developer setup](docs/DEVELOPER_SETUP.md) |
+| Website widget and API | `echo-web/` | [Web setup](echo-web/README.md) |
+| Shared commands, personas, intent data, and skills | `shared/` | [Commands](docs/COMMANDS.md) and [skills](docs/SKILLS.md) |
+| Optional voice and speech helpers | `tools/KokoroVoice/`, `tools/WhisperHost/` | [Third-party licenses](docs/LICENSES.md) |
 
-## Start here
+## Run the Windows assistant
 
-- [Architecture](docs/ARCHITECTURE.md)
-- [Development and setup](docs/DEVELOPMENT.md)
-- [Team workflow and synchronization](docs/TEAM_WORKFLOW.md)
-- [Security](docs/SECURITY.md)
-- [Current status and verification](docs/CURRENT_STATUS.md)
-- [Codex handoff](docs/CODEX_HANDOFF.md)
+Install Python 3.12 with the Windows launcher. Start FreeLLMAPI separately, then run from the repository root:
 
-Older notes remain in [feature audit](docs/FEATURE_AUDIT.md), [troubleshooting](docs/TROUBLESHOOTING.md), and [repository design](docs/UNIFIED_REPOSITORY_DESIGN.md).
+```powershell
+powershell -File desktop\EchoDesktop\Run-EchoDesktop.ps1
+```
 
-## Build EchoPhone
+Configure the model endpoint and key in Echo Settings. The usual FreeLLMAPI address is `http://127.0.0.1:31415/v1`. Keep the key in your local settings. See [desktop setup](desktop/EchoDesktop/README.md) for optional speech and gesture features.
 
-On Windows, install Git for Windows and use Android Studio/JDK or the supplied setup script. The project does not include gradlew.bat.
+## Build Android and test the web integration
 
-    Copy-Item scripts\echo-env.example.ps1 .echo-env.ps1
-    notepad .echo-env.ps1
-    . .\.echo-env.ps1
-    .\Setup-Build-Deploy.ps1
+Open the repository in Android Studio or use JDK 17, Android SDK 36, and Gradle 9.6.0 to run `gradle testDebugUnitTest assembleDebug`. The existing `Echo.apk` is a legacy artifact. The APK supplied in the Deluxe handoff is a separate build, and its matching Android source was absent from that archive.
 
-See [Development](docs/DEVELOPMENT.md) for prerequisites, tests, backend setup, and Kokoro setup. Paths are machine-specific; secrets and model files are not in Git.
+The browser widget uses the headless engine and its own sessions. Follow [web setup and the client checklist](echo-web/README.md) before configuring a website.
 
-## Current verification
+## Checks
 
-The Android debug build and available Gradle unit-test task were run on 2026-10-29. The APK is at F:\Android\Build\EchoPhone\outputs\apk\debug\app-debug.apk. The unit-test task reports NO-SOURCE; this project currently has no Kotlin/Java unit tests. See [Current status](docs/CURRENT_STATUS.md) for results and blockers.
+```powershell
+python -m unittest discover -s echo-web/tests
+Set-Location desktop/EchoDesktop
+python -m unittest discover -s tests
+```
 
-## Collaboration
-
-The private repository is https://github.com/echo-assistant-project/Echo. Use main for stable shared work and short-lived feature/* or fix/* branches for changes. The safe synchronization script is scripts/sync-project.ps1; it does not transfer uncommitted edits. See [Team workflow](docs/TEAM_WORKFLOW.md).
-
-A Windows desktop app, continuous wake-word recognition, working screen vision, phone-side Kokoro playback verification, and automatic sync are not currently established features.
+The [headless backend](docs/HEADLESS_BACKEND.md) supports testing text without launching the desktop interface. For details on credentials and collaboration, see [security](docs/SECURITY.md) and [team workflow](docs/TEAM_WORKFLOW.md).
