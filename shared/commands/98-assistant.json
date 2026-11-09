@@ -1,0 +1,742 @@
+{
+ "version": 1,
+ "commands": [
+  {
+   "id": "pa.task.add",
+   "group": "Assistant",
+   "title": "Add a task",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "new task {q}",
+    "create [a] [new] task {q}",
+    "add {q} to my (tasks|task list|to do list|todo list|to-do list)",
+    "put {q} on my (task|to do|todo|to-do) list"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "task_add",
+    "arg": "text",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.task.today",
+   "group": "Assistant",
+   "title": "Today's tasks",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what is on my plate [today]",
+    "what (do i have to do|is on my to do list|are my tasks) [today]",
+    "(show|list|read) [me] my tasks [for today]",
+    "my tasks [for today]",
+    "today's tasks",
+    "tasks for today"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "tasks",
+    "a_view": "today"
+   }
+  },
+  {
+   "id": "pa.task.overdue",
+   "group": "Assistant",
+   "title": "Overdue tasks",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(what is|show [me]) overdue",
+    "[show] [my] overdue tasks",
+    "what am i behind on"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "tasks",
+    "a_view": "overdue"
+   }
+  },
+  {
+   "id": "pa.task.upcoming",
+   "group": "Assistant",
+   "title": "Upcoming tasks",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(show|what are) [my] upcoming tasks",
+    "what is due this week",
+    "tasks (this|for the) week"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "tasks",
+    "a_view": "upcoming"
+   }
+  },
+  {
+   "id": "pa.task.all",
+   "group": "Assistant",
+   "title": "All tasks",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(show|list|read) all [of] my tasks",
+    "all my tasks"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "tasks",
+    "a_view": "all"
+   }
+  },
+  {
+   "id": "pa.task.done_list",
+   "group": "Assistant",
+   "title": "Tasks I finished",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what have i (finished|completed|done) [recently]",
+    "(show|list) [my] (done|completed|finished) tasks"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "tasks",
+    "a_view": "done"
+   }
+  },
+  {
+   "id": "pa.task.done",
+   "group": "Assistant",
+   "title": "Mark a task done",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(mark|tick off|check off) {q} [as] (done|complete|completed|finished)",
+    "(finished|completed|done with) [the] task {q}",
+    "task done {q}",
+    "tick off task {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "task_done",
+    "arg": "task",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.task.plan_day",
+   "group": "Assistant",
+   "title": "Plan my day",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "plan my day",
+    "plan [out] (today|the day)",
+    "(make|build|give) me a plan for (today|the day|my day)",
+    "time block my day",
+    "schedule my day",
+    "plan today for me"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "plan_my_day"
+   }
+  },
+  {
+   "id": "pa.task.next",
+   "group": "Assistant",
+   "title": "What to do next",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what should i do next",
+    "what should i work on [next|now]",
+    "what is next on my list",
+    "what next on my list",
+    "what to do next"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "what_next"
+   }
+  },
+  {
+   "id": "pa.followup.add",
+   "group": "Assistant",
+   "title": "Follow up later",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "follow up (with|on) {q}",
+    "add [a] follow up (with|on|for) {q}",
+    "(add|new|set|create) [a] (follow up|followup) {q}",
+    "chase {q} later"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "follow_up",
+    "arg": "text",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.followup.list",
+   "group": "Assistant",
+   "title": "My follow-ups",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(show|what are) my follow ups",
+    "who do i need to follow up with",
+    "follow ups [due] [today]",
+    "any follow ups [today]"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "follow_ups"
+   }
+  },
+  {
+   "id": "pa.followup.done",
+   "group": "Assistant",
+   "title": "Close a follow-up",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(followed up|done following up) (with|on) {q}",
+    "close [the] follow up (with|on|for) {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "follow_up_done",
+    "arg": "item",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.money.spent",
+   "group": "Assistant",
+   "title": "Log an expense",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "i spent {q}",
+    "(log|add|record|note|save|write) [an|a|my] (expense|expenses) [of] {q}",
+    "(note|log|add) [my] (kharcha|spending) [of] {q}",
+    "i paid {q}",
+    "spent {q}",
+    "expense {q}",
+    "expense of {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "expense_add",
+    "arg": "text",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.money.month",
+   "group": "Assistant",
+   "title": "Spending this month",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "how much (did i spend|have i spent) [this month]",
+    "(show|what is|what are) my (spending|expenses) [this month]",
+    "(monthly|this month's) spending",
+    "my expenses"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "expenses",
+    "a_period": "month"
+   }
+  },
+  {
+   "id": "pa.money.week",
+   "group": "Assistant",
+   "title": "Spending this week",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "how much (did i spend|have i spent) this week",
+    "[my] spending this week",
+    "[my] expenses this week"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "expenses",
+    "a_period": "week"
+   }
+  },
+  {
+   "id": "pa.money.today",
+   "group": "Assistant",
+   "title": "Spending today",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "how much (did i spend|have i spent) today",
+    "[my] spending today",
+    "[my] expenses today",
+    "[what is] [my] (today|todays|today's) total [kharcha|spending|expenses|expense]",
+    "today [my] total (kharcha|spending|expenses|expense)",
+    "(aaj|today) [ka] [total] kharcha [kitna]",
+    "how much [have i|did i] (spend|spent) (today|so far today)"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "expenses",
+    "a_period": "today"
+   }
+  },
+  {
+   "id": "pa.money.last_month",
+   "group": "Assistant",
+   "title": "Spending last month",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "how much did i spend last month",
+    "[my] (spending|expenses) last month"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "expenses",
+    "a_period": "last month"
+   }
+  },
+  {
+   "id": "pa.money.budget",
+   "group": "Assistant",
+   "title": "Set monthly budget",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "set [my] [monthly] budget [to] {n}",
+    "my [monthly] budget is {n}",
+    "budget {n} [rupees] a month"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "budget_set",
+    "arg": "monthly_amount",
+    "slot": "n"
+   }
+  },
+  {
+   "id": "pa.habit.add",
+   "group": "Assistant",
+   "title": "Track a new habit",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(new|track|start|add) [a] habit {q}",
+    "start tracking [the] habit {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "habit_add",
+    "arg": "name",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.habit.done",
+   "group": "Assistant",
+   "title": "Tick off a habit",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(habit done|log habit|tick habit|mark habit|check habit) {q}",
+    "i did [my] habit {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "habit_done",
+    "arg": "name",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.habit.list",
+   "group": "Assistant",
+   "title": "My habits",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(show|how are) my habits",
+    "habit (streaks|status|progress)",
+    "my habits",
+    "my streaks"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "habits"
+   }
+  },
+  {
+   "id": "pa.journal.add",
+   "group": "Assistant",
+   "title": "Journal entry",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(journal|dear diary|journal entry) {q}",
+    "(add to|write in) my journal {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "journal_add",
+    "arg": "text",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.journal.read",
+   "group": "Assistant",
+   "title": "My journal and mood",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "how have i been feeling [lately|this week]",
+    "(read|show) my journal",
+    "my mood this week",
+    "journal this week"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "journal_read"
+   }
+  },
+  {
+   "id": "pa.focus.start",
+   "group": "Assistant",
+   "title": "Start a focus session",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "start [a] (focus session|pomodoro|deep work session)",
+    "pomodoro [timer]",
+    "let us focus",
+    "deep work [mode] now"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "focus_start"
+   }
+  },
+  {
+   "id": "pa.focus.minutes",
+   "group": "Assistant",
+   "title": "Focus for N minutes",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(focus|pomodoro|deep work) for {n} minutes",
+    "start [a] {n} minute (focus session|pomodoro)"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "focus_start",
+    "arg": "minutes",
+    "slot": "n"
+   }
+  },
+  {
+   "id": "pa.focus.on",
+   "group": "Assistant",
+   "title": "Focus session on a task",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(start [a] focus session|focus session|deep work) on {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "focus_start",
+    "arg": "task",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.focus.stats",
+   "group": "Assistant",
+   "title": "Focus time",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "focus (stats|time|statistics|report)",
+    "how much did i focus [this week]",
+    "how much deep work did i do [this week]"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "focus_stats"
+   }
+  },
+  {
+   "id": "pa.people.birthday_add",
+   "group": "Assistant",
+   "title": "Save a birthday",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(add|save) [a] birthday [for] {q}",
+    "birthday reminder for {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "birthday_add",
+    "arg": "text",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.people.birthdays",
+   "group": "Assistant",
+   "title": "Upcoming birthdays",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "upcoming birthdays",
+    "whose birthday is (coming up|next|soon)",
+    "any birthdays (coming up|this week|this month|soon)"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "birthdays_upcoming"
+   }
+  },
+  {
+   "id": "pa.people.show",
+   "group": "Assistant",
+   "title": "What I know about someone",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what do i know about {q}",
+    "my notes (on|about) {q}",
+    "who is {q} to me"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "person_show",
+    "arg": "name",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.people.contacted",
+   "group": "Assistant",
+   "title": "I talked to someone",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "i (talked|spoke) (to|with) {q}",
+    "i (met|caught up with) {q} [today]",
+    "log [a] (call|chat) with {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "contacted",
+    "arg": "name",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.people.reconnect",
+   "group": "Assistant",
+   "title": "Who to catch up with",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "who should i (call|catch up with|reconnect with|get in touch with)",
+    "who have i not (talked to|spoken to) [in a while]"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "people_to_reconnect"
+   }
+  },
+  {
+   "id": "pa.day.my_day",
+   "group": "Assistant",
+   "title": "My day (personal brief)",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "my day",
+    "how (does|is) my day (look|looking)",
+    "what does my day look like",
+    "give me my day",
+    "what is my day like",
+    "my day today"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "my_day"
+   }
+  },
+  {
+   "id": "pa.day.weekly_review",
+   "group": "Assistant",
+   "title": "Weekly review",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "weekly review",
+    "review my week",
+    "how did my week go",
+    "my week in review"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "weekly_review"
+   }
+  },
+  {
+   "id": "pa.meeting.list",
+   "group": "Assistant",
+   "title": "Recent meetings",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(show|list) [my] [recent] meetings",
+    "my meeting notes"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "meetings"
+   }
+  },
+  {
+   "id": "pa.meeting.search",
+   "group": "Assistant",
+   "title": "Search meeting notes",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what did we decide about {q}",
+    "meeting notes (on|about) {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "meetings",
+    "arg": "query",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.phrase.teach",
+   "group": "Assistant",
+   "title": "Teach Echo a phrase",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(teach|learn) [the] [new] (phrase|shortcut|command) {q}",
+    "teach you {q}"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "teach_phrase",
+    "arg": "text",
+    "slot": "q"
+   }
+  },
+  {
+   "id": "pa.phrase.list",
+   "group": "Assistant",
+   "title": "Phrases I taught",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what phrases have you learned",
+    "(show|list) [my] (taught phrases|custom phrases|shortcuts i taught you)"
+   ],
+   "do": {
+    "kind": "mcp",
+    "op": "TOOL",
+    "tool": "phrases_taught"
+   }
+  }
+ ]
+}

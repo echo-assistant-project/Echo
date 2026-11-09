@@ -17,8 +17,8 @@ class PersonaTests(unittest.TestCase):
 
     def test_bad_persona_values_are_rejected_or_clamped(self):
         self.assertIsNone(core.parse_persona({"id": "X!", "name": "x", "prompt": "p"}))
-        p = core.parse_persona({"id": "ok", "name": "Ok", "prompt": "Be nice.", "speechRate": 9, "geminiVoice": "../x", "color": "red"})
-        self.assertEqual((1.15, "Aoede", "#42D9FF"), (p.speech_rate, p.gemini_voice, p.color))
+        p = core.parse_persona({"id": "ok", "name": "Ok", "prompt": "Be nice.", "speechRate": 9, "kokoroVoice": "../x", "color": "red"})
+        self.assertEqual((1.15, "af_heart", "#42D9FF"), (p.speech_rate, p.kokoro_voice, p.color))
 
     def test_missing_catalog_falls_back(self):
         self.assertEqual("echo", core.load_personas(Path(tempfile.gettempdir()) / "nope.json")[0].id)

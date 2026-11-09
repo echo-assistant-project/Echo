@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "families": {
+    "a": {"group": "Device status", "platforms": ["android"], "android": {"kind": "status", "topic": "$P"}},
+    "w": {"group": "Device status", "platforms": ["desktop"], "desktop": {"kind": "status", "topic": "$P"}},
+    "both": {"group": "Device status", "android": {"kind": "status", "topic": "$P"}, "desktop": {"kind": "status", "topic": "$D"}}
+  },
+  "commands": [
+    {"id": "status.storage", "family": "both", "P": "STORAGE", "D": "disk", "title": "Free storage", "phrases": ["how much (storage|space|disk space) (do i have|is left|is free)", "(free|available) (storage|space|disk space)", "[check] [my] storage [space|status]", "is my (phone|pc|disk|storage) full"]},
+    {"id": "status.memory", "family": "both", "P": "MEMORY", "D": "ram", "title": "Memory (RAM)", "phrases": ["how much (ram|memory) (do i have|is free|is used|is available)", "(ram|memory) usage", "[check] [my] ram"]},
+    {"id": "status.uptime", "family": "both", "P": "UPTIME", "D": "uptime", "title": "Uptime", "phrases": ["how long has my (phone|pc|computer|device) been (on|running)", "uptime", "when did i last restart"]},
+    {"id": "status.screen", "family": "both", "P": "SCREEN", "D": "screen", "title": "Screen size", "phrases": ["what is my (screen|display) (resolution|size)", "screen resolution"]},
+    {"id": "status.timezone", "family": "both", "P": "TIMEZONE", "D": "timezone", "title": "My time zone", "phrases": ["what (time zone|timezone) am i in", "what is my (time zone|timezone)", "my (time zone|timezone)"]},
+    {"id": "status.echo_version", "family": "both", "P": "ECHO_VERSION", "D": "echo_version", "title": "Echo version", "phrases": ["what version (are you|of echo is this)", "echo version", "which version of echo"]},
+    {"id": "status.cpu", "family": "both", "P": "CPU", "D": "cpu", "title": "Processor", "phrases": ["(what|which) (processor|cpu|chip|chipset) (do i have|is this)", "(cpu|processor) (info|usage|load|cores)", "how many (cores|cpu cores) do i have"]},
+    {"id": "status.language", "family": "both", "P": "LANGUAGE", "D": "language", "title": "System language", "phrases": ["what is my (system|device|phone|pc) language", "which language is my (phone|pc|system) in"]},
+    {"id": "status.charging", "family": "a", "P": "CHARGING", "title": "Charging status", "phrases": ["is my phone charging", "am i charging", "is it charging", "charging status", "how long until (fully charged|full)"]},
+    {"id": "status.battery_health", "family": "a", "P": "BATTERY_HEALTH", "title": "Battery health", "phrases": ["[how is] [my] battery health", "is my battery (healthy|ok|okay|good)"]},
+    {"id": "status.battery_temp", "family": "a", "P": "BATTERY_TEMPERATURE", "title": "Battery temperature", "phrases": ["[what is] [my] battery temperature", "is my phone (hot|overheating)", "how hot is my (phone|battery)"]},
+    {"id": "status.android_version", "family": "a", "P": "ANDROID_VERSION", "title": "Android version", "phrases": ["(what|which) android version (do i have|is this|am i running)", "android version", "what version of android (do i have|is this|am i running)"]},
+    {"id": "status.model", "family": "a", "P": "DEVICE_MODEL", "title": "Phone model", "phrases": ["(what|which) phone (is this|do i have)", "(phone|device) model", "what model is my phone"]},
+    {"id": "status.network", "family": "a", "P": "NETWORK", "title": "Network connection", "phrases": ["am i (online|connected|on wifi|on mobile data)", "(what|which) network am i (on|connected to)", "is my internet (working|on|connected)", "connection status", "do i have internet"]},
+    {"id": "status.airplane", "family": "a", "P": "AIRPLANE", "title": "Airplane mode status", "phrases": ["is (airplane|flight) mode (on|off|enabled)", "am i in (airplane|flight) mode"]},
+    {"id": "status.dnd", "family": "a", "P": "DND", "title": "Do Not Disturb status", "phrases": ["is do not disturb (on|off|enabled)", "is dnd (on|off)", "am i on do not disturb"]},
+    {"id": "status.ringer", "family": "a", "P": "RINGER", "title": "Ringer mode", "phrases": ["is my phone (on silent|on vibrate|silent|muted)", "(what is|what's) my ringer (mode|set to)", "ringer mode"]},
+    {"id": "status.volume_levels", "family": "a", "P": "VOLUME_LEVELS", "title": "Volume levels", "phrases": ["(what is|what's) [the|my] volume [level|at]", "how loud is my phone", "volume levels"]},
+    {"id": "status.brightness", "family": "a", "P": "BRIGHTNESS", "title": "Brightness level", "phrases": ["(what is|what's) [the|my] brightness [level|at]", "how bright is my screen", "brightness level"]},
+    {"id": "status.power_saver", "family": "a", "P": "POWER_SAVER", "title": "Battery saver status", "phrases": ["is (battery saver|power saving|power saver) (on|off|enabled)", "am i in (battery saver|power saving) mode"]},
+    {"id": "status.location", "family": "a", "P": "LOCATION", "title": "Location status", "phrases": ["is [my] (location|gps) (on|off|enabled)", "is location (on|off|enabled)"]},
+    {"id": "status.dark_mode", "family": "a", "P": "DARK_MODE", "title": "Dark mode status", "phrases": ["is dark mode (on|off|enabled)", "am i (in|using) dark mode"]},
+    {"id": "status.headphones", "family": "a", "P": "HEADPHONES", "title": "Headphones connected?", "phrases": ["are [my] (headphones|earphones|earbuds|airpods) connected", "what audio device am i using", "where is the sound playing"]},
+    {"id": "status.next_alarm", "family": "a", "P": "NEXT_ALARM", "title": "Next alarm", "phrases": ["when is my next alarm", "(what time is|what is) my [next] alarm [set for]", "do i have an alarm [set] [for tomorrow]", "next alarm"]},
+    {"id": "status.font_scale", "family": "a", "P": "FONT_SCALE", "title": "Font size", "phrases": ["(what is|what's) my (font|text) size", "how big is my text"]},
+    {"id": "status.data_saver", "family": "a", "P": "DATA_SAVER", "title": "Data saver status", "phrases": ["is data saver (on|off|enabled)", "am i (on|using) data saver"]},
+    {"id": "status.security_patch", "family": "a", "P": "SECURITY_PATCH", "title": "Security patch", "phrases": ["(what is|when was) my [last] security (patch|update)", "security patch [level|date]", "is my phone up to date"]},
+    {"id": "status.windows_version", "family": "w", "P": "os", "title": "Windows version", "phrases": ["(what|which) (windows|windows version|version of windows) (do i have|is this|am i running)", "windows version", "what os (is this|am i running)"]},
+    {"id": "status.pc_name", "family": "w", "P": "pc_name", "title": "PC name", "phrases": ["what is (my|this) (pc|computer) (name|called)", "(pc|computer) name", "what is this pc called"]},
+    {"id": "status.ip", "family": "w", "P": "ip", "title": "Local IP address", "phrases": ["what is my [local] ip [address]", "[local] ip address", "show my ip"]},
+    {"id": "status.battery_time", "family": "w", "P": "battery_time", "title": "Battery time left", "phrases": ["how long will my battery last", "battery time (left|remaining)", "how much battery time (is left|do i have)"]},
+    {"id": "status.battery_level", "family": "both", "P": "BATTERY", "D": "battery_time", "title": "Battery level", "phrases": ["(what is|what's|check|tell me|show me) [my|the] [laptop|pc|computer] (battery level|battery percentage|battery percent|battery charge|charge level|battery status)", "[my] (battery level|battery percentage|battery percent)", "how much (battery|charge) (is left|do i have left|have i got|have i got left|left)", "is my (laptop|pc|computer) (charging|plugged in)", "am i plugged in"]},
+    {"id": "status.user", "family": "w", "P": "user", "title": "Signed-in user", "phrases": ["who is (signed|logged) in", "which user (is this|am i signed in as)", "current user"]}
+  ]
+}

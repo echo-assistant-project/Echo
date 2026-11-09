@@ -1,0 +1,953 @@
+{
+ "version": 1,
+ "commands": [
+  {
+   "id": "jarvis.brain.status",
+   "group": "JARVIS pack",
+   "title": "Which AI brain is answering",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "which (brain|ai|model) are you using",
+    "are you (online|offline|running locally|running on this pc)",
+    "what (brain|ai brain|ai model) are you (using|on)",
+    "(brain|ai brain) status"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "BRAIN_STATUS"
+   }
+  },
+  {
+   "id": "jarvis.brain.local",
+   "group": "JARVIS pack",
+   "title": "Use the local AI only",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "use [the] (local|offline) (brain|ai|model)",
+    "(switch|go) to [the] (local|offline) (brain|ai|model)",
+    "(think|run) (locally|on this pc|offline)",
+    "offline mode on"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "BRAIN_LOCAL"
+   }
+  },
+  {
+   "id": "jarvis.brain.cloud",
+   "group": "JARVIS pack",
+   "title": "Use the main AI only",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "use [the] (online|cloud|main) (brain|ai|model) [only]",
+    "(switch|go) to [the] (online|cloud|main) (brain|ai|model)",
+    "offline mode off"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "BRAIN_CLOUD"
+   }
+  },
+  {
+   "id": "jarvis.brain.auto",
+   "group": "JARVIS pack",
+   "title": "Automatic AI brain",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(auto|automatic) (brain|ai) [mode]",
+    "(switch|go) to [the] (auto|automatic) (brain|ai)",
+    "use whichever (brain|ai) works"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "BRAIN_AUTO"
+   }
+  },
+  {
+   "id": "jarvis.privacy.on",
+   "group": "JARVIS pack",
+   "title": "Privacy mode on",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "privacy mode [on]",
+    "(turn|switch) on privacy mode",
+    "(go|be) private",
+    "blackout mode [on]",
+    "(enable|start) privacy mode",
+    "nothing leaves this pc"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PRIVACY_ON"
+   }
+  },
+  {
+   "id": "jarvis.privacy.off",
+   "group": "JARVIS pack",
+   "title": "Privacy mode off",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "privacy mode off",
+    "(turn|switch) off privacy mode",
+    "(disable|stop|end|exit) privacy mode",
+    "blackout mode off"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PRIVACY_OFF"
+   }
+  },
+  {
+   "id": "jarvis.privacy.status",
+   "group": "JARVIS pack",
+   "title": "Is privacy mode on",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "is privacy mode on",
+    "(am i|are we) in privacy mode",
+    "privacy mode status"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PRIVACY_STATUS"
+   }
+  },
+  {
+   "id": "jarvis.nudge.now",
+   "group": "JARVIS pack",
+   "title": "Anything I should know",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "anything i should know [about]",
+    "(what|anything) (needs|need) my attention",
+    "any (nudges|alerts|heads up) [for me]",
+    "what am i forgetting",
+    "(did|have) i (forget|forgotten) anything",
+    "anything important [right now|today]"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "NUDGES_NOW"
+   }
+  },
+  {
+   "id": "jarvis.nudge.on",
+   "group": "JARVIS pack",
+   "title": "Turn on nudges",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(turn|switch) on [the] (nudges|proactive mode|heads ups)",
+    "(nudges|proactive mode) on",
+    "(nudge|remind) me (when|if) something (needs|is due)",
+    "be proactive"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PROACTIVE_ON"
+   }
+  },
+  {
+   "id": "jarvis.nudge.off",
+   "group": "JARVIS pack",
+   "title": "Turn off nudges",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(turn|switch) off [the] (nudges|proactive mode|heads ups)",
+    "(nudges|proactive mode) off",
+    "stop (the|your) nudges",
+    "stop nudging me",
+    "no more nudges"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PROACTIVE_OFF"
+   }
+  },
+  {
+   "id": "jarvis.notes.add",
+   "group": "JARVIS pack",
+   "title": "Learn a folder of notes",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "learn [my] {q} folder",
+    "(learn|study|index) [the|my] (files|notes|documents) in {q}",
+    "add {q} to your (knowledge|notes|second brain|brain)",
+    "learn {q}"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "NOTES_ADD"
+   }
+  },
+  {
+   "id": "jarvis.notes.forget",
+   "group": "JARVIS pack",
+   "title": "Forget a notes folder",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(stop learning|unlearn|stop reading) [the|my] {q} folder",
+    "(stop learning|unlearn) {q}",
+    "remove {q} from your (knowledge|notes|second brain)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "NOTES_FORGET"
+   }
+  },
+  {
+   "id": "jarvis.notes.refresh",
+   "group": "JARVIS pack",
+   "title": "Re-read my notes",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(refresh|update|reread|re read) [my|your] (notes|knowledge|second brain|documents index)",
+    "(read|check) my (notes|documents) again"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "NOTES_REFRESH"
+   }
+  },
+  {
+   "id": "jarvis.notes.status",
+   "group": "JARVIS pack",
+   "title": "What notes Echo knows",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what (files|notes|documents|folders) (do you know|have you read|have you learned)",
+    "(second brain|knowledge base) status",
+    "how many (notes|files|documents) do you know"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "NOTES_STATUS"
+   }
+  },
+  {
+   "id": "jarvis.notes.ask",
+   "group": "JARVIS pack",
+   "title": "Ask my notes",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what do my (notes|files|documents) say about {q}",
+    "(search|check|look in) my (notes|files|documents) (for|about) {q}",
+    "(find|look up) {q} in my (notes|files|documents)",
+    "ask my (notes|second brain|documents) {q}",
+    "what did i (write|note) (about|on) {q}",
+    "do my (notes|documents) mention {q}"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "NOTES_ASK"
+   }
+  },
+  {
+   "id": "jarvis.recap",
+   "group": "JARVIS pack",
+   "title": "Where did we leave off",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "where did we leave off",
+    "what (was|were) i (doing|working on) [last time|before]",
+    "what were we (talking|working) (about|on)",
+    "(catch|bring) me up [to speed]",
+    "recap [our] last (chat|session|conversation)",
+    "what did we (do|talk about) last time",
+    "pick up where we left off",
+    "continue where we left off"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "RECAP"
+   }
+  },
+  {
+   "id": "jarvis.telegram.status",
+   "group": "JARVIS pack",
+   "title": "Telegram status",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(is|are) telegram [bridge] (on|connected|working)",
+    "telegram [bridge] status",
+    "(set up|connect) telegram",
+    "how do i (message|text) you from my phone",
+    "can i (message|text) you from telegram"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "TELEGRAM_STATUS"
+   }
+  },
+  {
+   "id": "jarvis.telegram.off",
+   "group": "JARVIS pack",
+   "title": "Turn off Telegram",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(turn|switch) off telegram",
+    "telegram off",
+    "(disconnect|stop) telegram",
+    "stop reading my telegram"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "TELEGRAM_OFF"
+   }
+  },
+  {
+   "id": "jarvis.telegram.unpair",
+   "group": "JARVIS pack",
+   "title": "Unpair Telegram",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "unpair telegram",
+    "(forget|remove) my telegram (account|chat)",
+    "reset telegram pairing"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "TELEGRAM_UNPAIR"
+   }
+  },
+  {
+   "id": "jarvis.hotkey",
+   "group": "JARVIS pack",
+   "title": "Echo's keyboard shortcut",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what is your (shortcut|hotkey|keyboard shortcut)",
+    "how do i (summon|call|open) you (with|from) the keyboard",
+    "(echo|your) (shortcut|hotkey)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "HOTKEY_STATUS"
+   }
+  },
+  {
+   "id": "jarvis.click.named",
+   "group": "JARVIS pack",
+   "title": "Click a button by its name",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "press the {q} button",
+    "hit the {q} button",
+    "select the {q} (tab|option|menu)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "CLICK_NAMED"
+   }
+  },
+  {
+   "id": "jarvis.click.double",
+   "group": "JARVIS pack",
+   "title": "Double-click by name",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "double tap [on] [the] {q}"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "DOUBLE_CLICK_NAMED"
+   }
+  },
+  {
+   "id": "jarvis.lessons.actions",
+   "group": "JARVIS pack",
+   "title": "What Echo did for me",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what did you (just do|do [just now]|do today|do for me)",
+    "what have you (done|been doing) [today|for me]",
+    "(show|list|tell) [me] (what you did|your actions|your activity)",
+    "(action|activity) (log|history)",
+    "what (actions|things) did you (take|do)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "ACTIONS_LOG"
+   }
+  },
+  {
+   "id": "jarvis.lessons.phrases_check",
+   "group": "JARVIS pack",
+   "title": "Check my taught phrases",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(check|test) my (phrases|taught phrases|shortcuts|routines)",
+    "are my (phrases|shortcuts|routines) (working|ok|okay|fine)",
+    "(is|are) any of my (phrases|shortcuts|routines) broken"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PHRASES_CHECK"
+   }
+  },
+  {
+   "id": "jarvis.lessons.phrase_forget",
+   "group": "JARVIS pack",
+   "title": "Unlearn a taught phrase",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(unlearn|delete|remove) the (phrase|shortcut) {q}",
+    "stop using the phrase {q}",
+    "(unlearn|undo) that phrase",
+    "forget that phrase"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "PHRASE_FORGET"
+   }
+  },
+  {
+   "id": "jarvis.lessons.here",
+   "group": "JARVIS pack",
+   "title": "What can I say here",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what can i say (here|now|in this app)",
+    "what can you do (here|in this app|with this app|in this window)",
+    "(commands|shortcuts|help) for this (app|window|program)",
+    "what (commands|shortcuts) work here",
+    "how can you help [me] (here|with this app)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "WHAT_CAN_I_SAY"
+   }
+  },
+  {
+   "id": "jarvis.skills.list",
+   "group": "JARVIS pack",
+   "title": "What skills Echo has",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what skills do you (have|know)",
+    "(list|show) [me] your skills",
+    "how many skills do you have",
+    "(list|show) [me] your {q} skills",
+    "what {q} skills do you have"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILLS_LIST"
+   }
+  },
+  {
+   "id": "jarvis.skills.read",
+   "group": "JARVIS pack",
+   "title": "Read a skill",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(read|show|open) [me] [the|your] {q} skill",
+    "what does [the|your] {q} skill say",
+    "tell me about [the|your] {q} skill"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILL_READ"
+   }
+  },
+  {
+   "id": "jarvis.skills.folder",
+   "group": "JARVIS pack",
+   "title": "Open my skills folder",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "open [my] skills folder",
+    "where do i put my [own] skills",
+    "add my own skill",
+    "where are your skills"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILLS_FOLDER"
+   }
+  },
+  {
+   "id": "jarvis.skills.on",
+   "group": "JARVIS pack",
+   "title": "Use skills",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(use|turn on) [your] skills",
+    "skills on",
+    "start using [your] skills"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILLS_ON"
+   }
+  },
+  {
+   "id": "jarvis.skills.off",
+   "group": "JARVIS pack",
+   "title": "Stop using skills",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(stop using|turn off|don't use) [your] skills",
+    "skills off"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILLS_OFF"
+   }
+  },
+  {
+   "id": "jarvis.skills.teach",
+   "group": "JARVIS pack",
+   "title": "Teach me a subject",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "teach me [about] {q}",
+    "(give me|start) [a] (lesson|lessons|course) (on|in|about) {q}",
+    "i want to learn {q}",
+    "(train|tutor) me (in|on) {q}",
+    "start the {q} course"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILL_TEACH"
+   }
+  },
+  {
+   "id": "jarvis.skills.lesson_next",
+   "group": "JARVIS pack",
+   "title": "Next lesson",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "next lesson",
+    "(continue|go on with) the (lesson|course)",
+    "(next|continue) [the] (lesson|chapter)",
+    "teach me the next (part|lesson)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "LESSON_NEXT"
+   }
+  },
+  {
+   "id": "jarvis.skills.lesson_again",
+   "group": "JARVIS pack",
+   "title": "Repeat the lesson",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "repeat the lesson",
+    "(say|teach) that lesson again",
+    "(repeat|redo) this lesson",
+    "lesson again"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "LESSON_AGAIN"
+   }
+  },
+  {
+   "id": "jarvis.skills.lesson_stop",
+   "group": "JARVIS pack",
+   "title": "Stop the lesson",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "stop the (lesson|course)",
+    "(pause|end|finish) the (lesson|course)",
+    "no more lessons"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "LESSON_STOP"
+   }
+  },
+  {
+   "id": "jarvis.skills.courses",
+   "group": "JARVIS pack",
+   "title": "Courses to learn a subject",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(what|which) course should i (take|do) (for|on|to learn) {q}",
+    "(recommend|suggest) [a] course (for|on|about|in) {q}",
+    "where can i learn {q}",
+    "best course (for|on|to learn) {q}",
+    "courses (for|on|about) {q}"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "SKILL_COURSES"
+   }
+  },
+  {
+   "id": "vault.open",
+   "group": "Vault",
+   "title": "Open my vault",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "open my (vault|password vault|passwords)",
+    "(manage|edit) my (passwords|vault|cards)",
+    "(add|save) a (password|card|pin|login) [to my vault]",
+    "(add|save) [a] [new] (password|card|pin) to the vault"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_OPEN"
+   }
+  },
+  {
+   "id": "vault.list",
+   "group": "Vault",
+   "title": "What's in my vault",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "what is in my vault",
+    "(list|show) my vault [items]",
+    "which passwords do you (have|keep)",
+    "what passwords are saved"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_LIST"
+   }
+  },
+  {
+   "id": "vault.lock",
+   "group": "Vault",
+   "title": "Lock my vault",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "lock [my|the] vault",
+    "lock my passwords",
+    "close [my|the] vault"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_LOCK"
+   }
+  },
+  {
+   "id": "vault.log",
+   "group": "Vault",
+   "title": "When my vault was used",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "when was my vault used",
+    "vault (history|log|activity)",
+    "who used my passwords"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_LOG"
+   }
+  },
+  {
+   "id": "vault.unlock_phone",
+   "group": "Vault",
+   "title": "Unlock my phone",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "unlock my (phone|mobile)",
+    "unlock the (phone|mobile)",
+    "open my phone lock",
+    "unlock [my] {q} phone"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_UNLOCK_PHONE"
+   }
+  },
+  {
+   "id": "vault.type_password",
+   "group": "Vault",
+   "title": "Type a saved password",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type my {q} password",
+    "(enter|fill [in]|put in) my {q} password",
+    "type [the] password for {q}",
+    "(type|enter) my password",
+    "(enter|fill [in]) [the] password for {q}",
+    "type [my] {q} wifi password"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_PASSWORD"
+   }
+  },
+  {
+   "id": "vault.type_username",
+   "group": "Vault",
+   "title": "Type a saved username",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type my {q} (username|user name|email id|login id)",
+    "(enter|fill [in]) my {q} (username|user name|login id)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_USERNAME"
+   }
+  },
+  {
+   "id": "vault.fill_login",
+   "group": "Vault",
+   "title": "Fill a saved login",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "(fill|fill in|log me in with) my {q} login",
+    "sign me in (to|with) {q}",
+    "fill [in] [the] login for {q}"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_FILL_LOGIN"
+   }
+  },
+  {
+   "id": "vault.autofill",
+   "group": "Vault",
+   "title": "Autofill this sign-in page",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "autofill [my] [password|login|details]",
+    "auto fill [my] [password|login|details]",
+    "fill [in] my (password|login) [here]",
+    "fill [in] [the] (password|login) here",
+    "fill this (login|sign in [page]|page)",
+    "enter my (login|details) here"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_AUTOFILL"
+   }
+  },
+  {
+   "id": "vault.login",
+   "group": "Vault",
+   "title": "Log me in here",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "log me in",
+    "log me in here",
+    "sign me in",
+    "sign me in here",
+    "log in for me",
+    "sign in for me"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_LOGIN"
+   }
+  },
+  {
+   "id": "vault.type_pin",
+   "group": "Vault",
+   "title": "Type a saved PIN",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type my {q} pin",
+    "(enter|fill [in]) my {q} pin"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_PIN"
+   }
+  },
+  {
+   "id": "vault.card_number",
+   "group": "Vault",
+   "title": "Type my card number",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type my card number",
+    "(enter|fill [in]) my card number",
+    "type my {q} card number",
+    "(enter|fill [in]) my {q} card number",
+    "fill my {q} card",
+    "fill my card [details]"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_CARD_NUMBER"
+   }
+  },
+  {
+   "id": "vault.card_expiry",
+   "group": "Vault",
+   "title": "Type my card expiry",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type my [{q}] card expiry [date]",
+    "(enter|fill [in]) my [{q}] card expiry [date]",
+    "type [the] expiry date"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_CARD_EXPIRY"
+   }
+  },
+  {
+   "id": "vault.card_cvv",
+   "group": "Vault",
+   "title": "Type my card CVV",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type my [{q}] card (cvv|cvc|security code)",
+    "(enter|fill [in]) my [{q}] card (cvv|cvc|security code)",
+    "type [the|my] (cvv|cvc|security code)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_CARD_CVV"
+   }
+  },
+  {
+   "id": "vault.card_holder",
+   "group": "Vault",
+   "title": "Type the name on my card",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "type [the] name on my [{q}] card",
+    "type my [{q}] card holder name"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_TYPE_CARD_HOLDER"
+   }
+  },
+  {
+   "id": "vault.copy",
+   "group": "Vault",
+   "title": "Copy a saved password",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "copy my {q} password",
+    "copy [the] password for {q}",
+    "copy my {q} (pin|code)"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_COPY"
+   }
+  },
+  {
+   "id": "vault.show",
+   "group": "Vault",
+   "title": "Show a vault item",
+   "platforms": [
+    "desktop"
+   ],
+   "phrases": [
+    "show my {q} password",
+    "show [me] [the] password for {q}",
+    "show my {q} card [details]",
+    "reveal my {q} password"
+   ],
+   "do": {
+    "kind": "echo",
+    "op": "VAULT_SHOW"
+   }
+  }
+ ]
+}
