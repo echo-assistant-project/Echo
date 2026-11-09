@@ -26,7 +26,7 @@ class Persona:
     tagline: str
     aliases: tuple
     prompt: str
-    kokoro_voice: str
+    gemini_voice: str
     speech_rate: float
     color: str
     uses_target_language: bool = False
@@ -36,7 +36,6 @@ class Persona:
 
 
 _ID = re.compile(r"^[a-z0-9_-]{2,24}$")
-_VOICE = re.compile(r"^[a-z]{2}_[a-z]{2,16}$")
 _COLOR = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
 
@@ -58,7 +57,7 @@ def parse_persona(obj: dict) -> Optional[Persona]:
     aliases = [a.lower() for a in (clean_line(x, 30) for x in obj.get("aliases", []) if isinstance(x, str)) if a]
     rate = obj.get("speechRate", 0.95)
     rate = min(max(float(rate), 0.65), 1.15) if isinstance(rate, (int, float)) else 0.95
-    voice = obj.get("kokoroVoice") if isinstance(obj.get("kokoroVoice"), str) and _VOICE.match(obj["kokoroVoice"]) else "af_heart"
+    voice = "Aoede"
     color = obj.get("color") if isinstance(obj.get("color"), str) and _COLOR.match(obj["color"]) else "#42D9FF"
     return Persona(pid.lower(), name, clean_line(obj.get("tagline"), 60) or "",
                    tuple(dict.fromkeys(aliases + [name.lower(), pid.lower()])), prompt, voice, rate, color,
@@ -72,7 +71,7 @@ def load_personas(path: Path = SHARED_PERSONAS) -> list:
     except (OSError, ValueError):
         personas = []
     return personas or [Persona("echo", "Echo", "Warm everyday companion", ("echo",),
-                                "You are Echo, a warm, supportive companion.", "af_heart", 0.95, "#42D9FF")]
+                                "You are Echo, a warm, supportive companion.", "Aoede", 0.95, "#42D9FF")]
 
 
 def find_persona(personas: list, spoken: str) -> Optional[Persona]:
@@ -185,7 +184,7 @@ _workspace_rx = None
 
 
 def install_workspaces(names) -> None:
-    """Named project folders from Settings ("website=C:\\…\\my-site"): “work on my website …”, “in my website, …”."""
+    """Named project folders from Settings ("website=C:\\…\\amaravati"): “work on my website …”, “in my website, …”."""
     global _workspace_rx
     names = sorted({normalize(n) for n in (names or []) if normalize(n)}, key=len, reverse=True)
     if not names:
@@ -289,10 +288,7 @@ def code_command(lower: str, original: str) -> Optional[Reply]:
     return None
 
 STOP_PHRASES = {"stop", "cancel", "stop it", "stop now", "stop echo", "echo stop", "halt", "that's enough",
-                "enough", "never mind", "nevermind", "forget it", "shut up", "be quiet", "quiet", "stop talking",
-                # "no, don't" after Echo offered something: stop at once instead of an AI round trip
-                "no don't", "no dont", "don't", "dont", "do not", "no do not", "no don't do it", "don't do it",
-                "no leave it", "leave it", "cancel that", "cancel it", "no cancel", "no stop"}
+                "enough", "never mind", "nevermind", "forget it", "shut up", "be quiet", "quiet", "stop talking"}
 NUMBER_WORDS = {"a": 1, "an": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
                 "eight": 8, "nine": 9, "ten": 10, "fifteen": 15, "twenty": 20, "thirty": 30, "forty": 40,
                 "fifty": 50, "sixty": 60, "ninety": 90}
@@ -367,7 +363,7 @@ def normalize(text: str) -> str:
 
 
 def is_stop(text: str) -> bool:
-    t = re.sub(r"[,;]", "", normalize(text)).replace("’", "'")
+    t = normalize(text)
     for prefix in ("hey echo ", "echo "):
         if t.startswith(prefix):
             t = t[len(prefix):]
@@ -510,27 +506,6 @@ def _parse_core(said: str, text: str, persona_aliases: frozenset) -> Optional[Re
         return Reply("action", action=Action("camera_question", {"question": original}))
     if (web := web_task(lower, original, lambda rest: _parse_core(rest, rest, persona_aliases) is not None)) is not None:
         return web
-    if (several := schedule_command(lower)) is not None:
-        return several
-    if (remind := remind_command(lower, original)) is not None:
-        return remind
-    if (agenda := agenda_command(lower)) is not None:
-        return agenda
-    if m := _WIPE.search(lower):
-        # "delete everything in my Documents": never by voice or chat, whoever says yes (it was 33 s of AI before)
-        where = m.group("where").strip().title()
-        return Reply("rejected", f"I won't delete or move everything in {where}: one wrong word would lose years of files, "
-                                 f"and a “yes” typed in chat isn't a confirmation. Name the files or sub-folder you mean, "
-                                 f"or select them in File Explorer yourself (they go to the Recycle Bin).")
-    words = set(re.findall(r"[a-z]+", lower))
-    if words & {"reminder", "reminders", "timer", "timers", "alarm", "alarms"} and not words & _REMINDER_EDIT_WORDS:
-        if words <= _LIST_REMINDER_WORDS:
-            return Reply("action", action=Action("list_timers", {}))   # "what all reminders i have": instant, no AI
-        extra = re.sub(r"[^a-z0-9 ]", " ", lower).split()
-        extra = [w for w in extra if w not in _LIST_REMINDER_WORDS | _LIST_REMINDER_ASIDE]
-        if words & {"which", "what", "show", "list", "only", "read", "tell"} and 0 < len(extra) <= 3:
-            # "show only my BP reminders", "which reminders i set for 8pm": the list, narrowed to those
-            return Reply("action", action=Action("list_timers", {"about": " ".join(extra)}))
     if _catalog is not None and (m := _catalog.match_exact(said)):
         return _from_catalog(m)
     if (change := change_command(lower, original)) is not None:
@@ -560,14 +535,7 @@ def _parse_core(said: str, text: str, persona_aliases: frozenset) -> Optional[Re
             Reply("action", action=Action("volume", {"change": "set", "percent": pct}))
     if lower.startswith(("remember", "don't forget", "note")) and (m := _RX["remember"].match(lower)):
         fact = clean_line(grp(m, 1), 300)
-        if fact and re.fullmatch(r"(?i)(?:it|that|this|these|those|them)(?:\s+(?:down|please|pls|for me|now))*", fact):
-            return None                      # "note it down": what "it" is lives in the conversation, so the AI saves it
-        if fact and re.search(r"\b(?:expenses?|kharcha|spent|spend|spending|paid)\b", fact) and \
-                _catalog is not None and (m2 := _catalog.match(said)):
-            return _from_catalog(m2)          # "note expense 850 diesel": money spent goes to expenses, not memories
         return Reply("action", action=Action("remember", {"fact": fact})) if fact else Reply("rejected", "That memory is empty or too long.")
-    if _FORGET_ALL.match(lower):
-        return Reply("action", action=Action("forget_all", {}))       # still asks before erasing
     if m := _RX["forget"].match(lower):
         return Reply("action", action=Action("forget", {"phrase": grp(m, 1)}))
     if m := _RX["name"].match(lower):
@@ -601,139 +569,8 @@ def _parse_core(said: str, text: str, persona_aliases: frozenset) -> Optional[Re
             url = valid_url(target)
             return Reply("action", action=Action("open_url", {"url": url})) if url else Reply("rejected", "That website address is not valid.")
         name = clean_line(target, 60)
-        if name and re.fullmatch(r"(?:it|that|this|them|those|these|that one|this one|the same|again)", name.lower()):
-            return None                    # "open it": what "it" is lives in the conversation, so the AI decides (or asks)
         return Reply("action", action=Action("open_app", {"name": name})) if name else None
     return None
-
-
-_LIST_REMINDER_WORDS = set("what which show list tell read me my all reminder reminders timer timers alarm alarms i have do "
-                           "now today pls please any are there the u you wat whats is running active current upcoming "
-                           "kya hai hain mere meri set did got saved made created pending still left".split())
-_WIPE = re.compile(r"\b(?:delete|erase|wipe|remove|clear|empty|trash|format|move)\b(?:\s+out)?\s+(?:all|everything|every file|"
-                   r"all (?:the )?files|all (?:my )?stuff|the whole|my whole|whole|entire|my entire)\b.{0,20}?\b(?:in|from|of|on)?\s*"
-                   r"(?:my\s+|the\s+)?(?P<where>documents|desktop|downloads|pictures|photos|music|videos|onedrive|c drive|"
-                   r"c:|d drive|user folder|home folder|pc|computer|laptop)\b")
-_LIST_REMINDER_ASIDE = set("only just for about of a an to on at so far yet".split())
-_REMINDER_EDIT_WORDS = set("cancel delete remove stop change move shift edit update snooze postpone clear turn off add new "
-                           "create remind every daily".split())
-_AGENDA_CUE = re.compile(r"^(?:please\s+|pls\s+)?(?:plan my day|plan (?:my )?(?:today|tomorrow)|my day|my schedule|schedule|"
-                         r"agenda|today i have|tomorrow i have|i have|remind me(?: about| of)?|set reminders?(?: for)?|"
-                         r"add reminders?(?: for)?)(?P<day>\s+(?:for\s+)?(?:today|tomorrow))?\s*(?::|-|—)\s*")
-
-
-def agenda_command(lower: str) -> Optional[Reply]:
-    """"Plan my day: pitch call 11am, lunch with founder 1pm, board deck review 4pm": several things, each with its
-    own time, become one reminder each (the AI used to keep only one of them)."""
-    from . import pa
-    m = _AGENDA_CUE.match(lower)
-    if not m:
-        return None
-    day = "tomorrow " if "tomorrow" in m.group(0) else ""
-    parts = [p.strip(" .") for p in re.split(r"\s*(?:,|;|\band then\b|\bthen\b|\band\b)\s*", lower[m.end():]) if p.strip(" .")]
-    if len(parts) < 2:
-        return None
-    items = []
-    for p in parts:
-        found = list(_time_token().finditer(p))
-        if len(found) != 1:
-            return None                                     # an item without a time (or with two): the AI sorts it out
-        label = (p[:found[0].start()] + " " + p[found[0].end():])
-        label = re.sub(r"\s+", " ", re.sub(r"^\s*(?:to|about)\b|\b(?:at|@|by|around|from)\s*$", " ", label.strip())).strip(" -.,")
-        when = day + found[0].group(0)
-        if not label or not pa.parse_when(when).has_time:
-            return None
-        items.append({"when": when, "label": clean_line(label, 60) or label})
-    return Reply("action", action=Action("remind", {"items": items}))
-_REMIND = re.compile(r"^(?:please\s+|pls\s+)?(?:remind me|set (?:a |an )?(?:reminder|alarm))\b\s*(?:(?:to|about|abt|of|for|that|called)\b)?\s*(.+)$")
-_REPEAT = re.compile(r"\b(every ?day|daily|every weekday|on weekdays|weekdays|every week|weekly|every month|monthly|of every month|"
-                     r"of each month|every (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?)\b")
-
-
-def _time_token():
-    from . import pa
-    part = pa._PART_WORDS
-    return re.compile(
-        rf"(?i)\b(?:{part})\s+(?:at\s+)?\d{{1,2}}(?:[:.]\d{{2}})?\b"                         # morning 8, night 8.30
-        rf"|\b\d{{1,2}}(?:[:. ][0-5]\d)?\s*(?:am|pm|a\.m\.|p\.m\.)(?=\W|$)"                  # 7 am, 6 30 pm, 2pm
-        rf"|\b\d{{1,2}}[:.][0-5]\d\b"                                                        # 14:00, 7.30
-        rf"|\b\d{{1,2}}(?:[:. ][0-5]\d)?\s+(?:o'?clock\s+)?(?:in the\s+)?(?:{part})\b")      # 8 night, 6 30 morning
-
-
-_SCHEDULE_NOISE = re.compile(
-    r"(?i)\b(?:remind(?:er)?s?(?: me)?|set(?: a| an| the)?(?: reminder| alarm)?|alarms?|every ?day|daily|weekdays?|weekly|"
-    r"every week|\d+\s*times?\s*(?:a |per )?(?:day|daily)|times daily|properly|correctly|pls|please|plz|i take|i have|i said|"
-    r"already|also|and|at|to|for|about|abt|of|my|is|are|the|its|it's|no|not|change|make it|update|instead|"
-    r"o'?clock|in the|ok|okay|haan|ji)\b|[.,;:!?]")
-
-
-def schedule_command(lower: str) -> Optional[Reply]:
-    """Several clock times for one thing ("eye drops 3 times a day 7 am 2 pm 10 pm", "amlodipine morning 8 and night 8,
-    remind me daily"): one reminder per time, daily when said so. Said again as a correction, it replaces the old ones
-    for the same thing ("replace") instead of piling up."""
-    from . import pa
-    tokens = list(_time_token().finditer(lower))
-    wants = re.search(r"\b(?:remind|reminder|alarm)\b", lower)
-    repeated = _REPEAT.search(lower) or re.search(r"\b\d+\s*times?\s*(?:a|per)?\s*day\b|\btimes daily\b", lower)
-    if len(tokens) < 2 or not (wants or repeated):
-        return None
-    whens = [t.group(0) for t in tokens]
-    if not all(pa.parse_when(w).has_time for w in whens):
-        return None
-    rest = lower
-    for t in reversed(tokens):
-        rest = rest[:t.start()] + " " + rest[t.end():]
-    label = re.sub(r"\s+", " ", _SCHEDULE_NOISE.sub(" ", rest)).strip(" -")
-    if not label:
-        return None                         # times without what they're for: the AI asks
-    repeat = "daily" if repeated else ""
-    return Reply("action", action=Action("remind", {"when": whens[0], "more": whens[1:], "label": clean_line(label, 60) or "",
-                                                    "repeat": repeat, "replace": True}))
-
-
-def remind_command(lower: str, original: str) -> Optional[Reply]:
-    """"remind me abt doctor tmrw 5pm", "remind me to pay fees on 10th 9am", "set alarm every day at 8 pm called bp
-    tablet": a reminder that rings at that time (Echo's date parser reads the time; no AI needed). "remind me in 10
-    minutes …" stays a timer, and "remind me to call the bank" (no time) stays a task."""
-    m = _REMIND.match(lower)
-    if not m or re.search(r"\bin\s+(?:\d+|a|an|half an?|one|two|three|five|ten|fifteen|twenty|thirty)\s+"
-                          r"(?:sec|secs|seconds?|min|mins|minutes?|hours?|hrs?)\b", m.group(1)):
-        return None                                    # "remind me in 10 minutes …": a timer
-    from . import pa
-    rep = _REPEAT.search(lower)
-    when = pa.parse_when(m.group(1))
-    if when.at is None or not (when.has_time or rep):
-        return None
-    word = rep.group(1) if rep else ""
-    repeat = ("" if not rep else "weekdays" if "weekday" in word else "monthly" if "month" in word else
-              "weekly" if ("week" in word or re.search(r"day\w*s?$", word) and "every day" not in word and "everyday" not in word
-                           and "daily" not in word) else "daily")
-    if repeat == "weekly" and re.search(r"every (\w+day)", word):
-        when_text = re.sub(r"every (\w+day)s?", r"\1", m.group(1))       # "every saturday 6pm" -> next Saturday 6 pm
-    else:
-        when_text = m.group(1)
-    label = _REPEAT.sub(" ", pa.parse_when(when_text).rest)
-    label = re.sub(r"\s+", " ", re.sub(r"^(?:to|about|abt|of|for|that|called)\s+|\s+(?:called|named)$", "", label.strip())).strip(" ,.")
-    label = re.sub(r"^called\s+|\s+remind me$|\s+pls$|\s+please$", "", label).strip(" ,.")
-    if not label and "alarm" in lower[:20]:
-        label = "Alarm"
-    # "sugar tablet morning 8 and night 8": one reminder per time said
-    parts = [p for p in re.split(r"\s+(?:and|aur|&|,)\s+(?:also\s+)?|,\s*", m.group(1)) if p.strip()]
-    whens = [p for p in parts if pa.parse_when(p).at is not None and pa.parse_when(p).has_time]
-    more = whens[1:] if len(whens) >= 2 else []
-    if more:
-        label = re.sub(r"\s+", " ", " ".join(pa.parse_when(_REPEAT.sub(" ", p)).rest for p in parts
-                                             if p not in whens[1:])).strip(" ,.")
-        label = re.sub(r"^(?:to|about|abt|of|for|that|called)\s+|\s+(?:remind me|pls|please)$", "", label).strip(" ,.")
-    return Reply("action", action=Action("remind", {"when": whens[0] if more else when_text, "more": more,
-                                                    "label": clean_line(label, 60) or "", "repeat": repeat}))
-
-
-# "forget everything you know about me", "delete all my memories", "wipe your memory": the whole memory, not one item
-_FORGET_ALL = re.compile(r"^(?:please\s+)?(?:forget|delete|erase|clear|wipe|remove)\s+(?:all\s+(?:of\s+)?)?"
-                         r"(?:everything(?:\s+(?:you know|about me|you know about me|you remember))?|"
-                         r"(?:all\s+)?(?:my|your)\s+memor(?:y|ies)|all\s+memories|all about me|what you know about me)"
-                         r"(?:\s+please)?[.!]*$")
 
 
 def _timer(seconds, label) -> Reply:
@@ -863,43 +700,7 @@ _SENSITIVE = [
     re.compile(r"\b(?:password|passcode|passwd|pin|otp|one[- ]time code|cvv|cvc|security code|secret|api key|token|seed phrase|recovery phrase)\b", re.I),
     re.compile(r"\b(?:\d[ -]?){12,19}\b"),
     re.compile(r"\b\d{4,8}\b.*\b(?:code|pin)\b", re.I),
-    # government and bank IDs belong in the vault, not in memory the AI reads: PAN (ABCDE1234F), Aadhaar / passport /
-    # licence / account numbers named as such
-    re.compile(r"\b[A-Z]{5}\d{4}[A-Z]\b", re.I),
-    re.compile(r"\b(?:aadhaa?r|passport|driving licen[cs]e|licen[cs]e number|account number|a/c no|ifsc|pan (?:card|number|no)"
-               r"|voter id|ssn|social security)\b.*\d", re.I),
 ]
-
-
-_INVISIBLE = re.compile("[​-‏ -‮⁠-⁩﻿­]")
-
-
-_SECRET_VALUE = re.compile(r"(?i)\b(password|passcode|passwd|pass word|pin|otp|one[- ]time code|cvv|cvc|api key|secret key)"
-                           r"(\s*(?:is|was|=|:|-)\s*)(\S+?)(?=[,.;!?]?(?:\s|$))")
-
-
-def mask_secrets(text: str) -> str:
-    """"my wifi password is Tr0ub4dor&3" -> "my wifi password is [hidden]": the value never goes to the cloud AI."""
-    return _SECRET_VALUE.sub(lambda m: m.group(1) + m.group(2) + "[hidden]", text or "")
-
-
-def normalize_input(text: str) -> str:
-    """What the user typed, as plain text: full-width and other compatibility letters folded (NFKC), zero-width and
-    direction-override characters removed, so look-alike text can't slip past the command router and safety checks."""
-    import unicodedata
-    return re.sub(r"[ \t]+", " ", _INVISIBLE.sub("", unicodedata.normalize("NFKC", text or ""))).strip()
-
-
-_YOU = [(r"\bmy\b", "your"), (r"\bmine\b", "yours"), (r"\bmyself\b", "yourself"), (r"\bi'm\b", "you're"), (r"\bi am\b", "you are"),
-        (r"\bi've\b", "you've"), (r"\bi\b", "you"), (r"\bme\b", "you")]
-
-
-def to_second_person(text: str) -> str:
-    """"my daughter Sravya's birthday is 12 Dec" -> "your daughter Sravya's birthday is 12 Dec" (for read-backs)."""
-    out = text or ""
-    for pat, rep in _YOU:
-        out = re.sub(pat, rep, out, flags=re.I)
-    return out
 
 
 def is_sensitive(text: str) -> bool:

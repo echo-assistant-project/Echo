@@ -1,4 +1,4 @@
-﻿# EchoDesktop speech helper (Windows PowerShell 5.1, built-in System.Speech; no downloads).
+# EchoDesktop speech helper (Windows PowerShell 5.1, built-in System.Speech; no downloads).
 # Modes:
 #   listen  - recognise one utterance (dictation) and print it
 #   wake    - listen continuously; print WAKE when "hey echo" (or similar) is heard

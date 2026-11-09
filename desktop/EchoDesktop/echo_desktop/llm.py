@@ -71,12 +71,6 @@ _QUOTA = re.compile(r"quota|rate[ _-]?limit|too many requests|insufficient|credi
                     r"tokens? per (minute|day|hour)|usage limit|billing|limit reached|all (providers|keys|models)", re.I)
 
 
-def not_running(base: str) -> str:
-    """The plain message when nothing answers at the AI address (no raw [WinError …] text)."""
-    return (f"FreeLLMAPI isn't running: nothing answers at {base}. Open FreeLLMAPI (Start menu), then ask again. "
-            f"(If it is open, compare the address in its tray menu with Echo Settings → AI URL.)")
-
-
 def classify(code: int, text: str) -> LlmError:
     """An error answer from FreeLLMAPI -> OutOfTokens when it means "no tokens left" or "too long", else LlmError."""
     detail = " ".join(str(text or "").split())[:200]
@@ -85,18 +79,9 @@ def classify(code: int, text: str) -> LlmError:
     if code in (402, 429) or _QUOTA.search(detail):
         return OutOfTokens("FreeLLMAPI's AI models are out of tokens for now (free limits reached).", "quota")
     if code:
-        if code in (401, 403):
-            return LlmError(f"FreeLLMAPI wants its key (it answered {code}): copy it from FreeLLMAPI's tray icon (starts with freellmapi-) "
-                            "into Echo Settings → AI API key, then ask again.")
-        return LlmError(f"FreeLLMAPI answered with an error (HTTP {code}). Please ask again in a moment.")
-    # a provider's raw error ({'message': 'Provider error (…): stream interrupted', 'type': …}) is not for people
-    m = re.search(r"""['"]message['"]\s*:\s*['"](.+?)['"]\s*[,}]""", detail)
-    reason = re.sub(r"^Provider error\s*\(.*\)\s*:\s*", "", m.group(1) if m else detail).strip(" .")
-    return AiHiccup("The AI service had a hiccup" + (f" ({reason[:80]})" if reason else "") + ". Please ask me again.")
-
-
-class AiHiccup(LlmError):
-    """A one-off failure inside a provider (a dropped stream): worth one quiet retry, not the "AI is down" fallback."""
+        hint = " (API key rejected or missing)" if code in (401, 403) else ""
+        return LlmError(f"FreeLLMAPI returned HTTP {code}{hint}.")
+    return LlmError(f"FreeLLMAPI error: {detail}")
 
 
 class InFlight:
@@ -138,9 +123,6 @@ class ChatClient:
         self.base = base_url.strip().rstrip("/")
         self.key = api_key.strip()
         self.model = model or "auto"
-        # the routes raced for "auto": a preferred model first when the user picked one (Settings → Preferred AI
-        # model), then FreeLLMAPI's own routing; never only a guess of ours
-        self.routes = HEDGE_ROUTES
         self.history: list = []
         self.in_flight = InFlight()                # shared with a BrainRouter, like history
         self.last_route = ""                       # which provider/model answered last (FreeLLMAPI's X-Routed-Via)
@@ -234,7 +216,7 @@ class ChatClient:
 
         def run(i: int, holder: dict) -> None:
             try:
-                for piece in self._stream_one(messages, timeout, self.routes[i], holder, tools):
+                for piece in self._stream_one(messages, timeout, HEDGE_ROUTES[i], holder, tools):
                     if holder.get("cancel"):
                         return
                     events.put(("text", i, piece))
@@ -255,7 +237,7 @@ class ChatClient:
             while True:
                 if time.monotonic() - started > timeout:
                     raise LlmError(f"FreeLLMAPI stopped answering: no reply in {timeout:.0f} s")
-                can_hedge = winner is None and len(holders) < len(self.routes)
+                can_hedge = winner is None and len(holders) < len(HEDGE_ROUTES)
                 wait = (next_at - time.monotonic()) if can_hedge else 1.0
                 try:
                     kind, i, value = events.get(timeout=max(0.01, wait))
@@ -268,7 +250,7 @@ class ChatClient:
                 if kind == "text":
                     if winner is None:
                         winner = i
-                        self.last_route = holders[i].get("routed") or self.routes[i]
+                        self.last_route = holders[i].get("routed") or HEDGE_ROUTES[i]
                         _first_word_s.append(time.monotonic() - started)
                         for j, h in enumerate(holders):
                             if j != i:
@@ -276,14 +258,14 @@ class ChatClient:
                     yield value
                 elif kind == "end":
                     if winner is None:
-                        self.last_route = holders[i].get("routed") or self.routes[i]
+                        self.last_route = holders[i].get("routed") or HEDGE_ROUTES[i]
                     return
                 else:                                 # error
                     if winner == i:
                         raise value
                     failed.add(i)
                     last_error = value
-                    if len(holders) < len(self.routes):
+                    if len(holders) < len(HEDGE_ROUTES):
                         next_at = launch()            # failed fast: race the next route now, don't wait
                     elif len(failed) == len(holders):
                         raise last_error
@@ -306,7 +288,7 @@ class ChatClient:
                 conn.request("POST", urlparse(self.base).path + "/chat/completions", body, headers)
                 response = conn.getresponse()
             except (OSError, http.client.HTTPException) as e:
-                raise LlmError(not_running(self.base)) from None
+                raise LlmError(f"Can't reach FreeLLMAPI at {self.base}: {e}") from None
             if response.status >= 400:
                 try:
                     detail = response.read(4000).decode("utf-8", "replace")
@@ -402,7 +384,7 @@ class ChatClient:
                 err = LlmError(f"FreeLLMAPI returned HTTP {e.code} (the AI model may not support images; pick a vision model in FreeLLMAPI).")
             raise err from None
         except (urllib.error.URLError, TimeoutError, OSError) as e:
-            raise LlmError(not_running(self.base)) from None
+            raise LlmError(f"Can't reach FreeLLMAPI at {self.base}: {getattr(e, 'reason', e)}") from None
         if "json" not in content_type.lower():
             raise LlmError("FreeLLMAPI returned a non-JSON page; check that the URL ends in /v1.")
         return _content(raw)
@@ -410,7 +392,7 @@ class ChatClient:
 
 def _unreachable(e: LlmError) -> bool:
     """The server isn't there (or stopped mid-way), as opposed to it answering with an error."""
-    return str(e).startswith(("Can't reach", "FreeLLMAPI isn't running", "FreeLLMAPI stopped answering"))
+    return str(e).startswith(("Can't reach", "FreeLLMAPI stopped answering"))
 
 
 def local_models(base_url: str, timeout: float = 2.0) -> list:
@@ -433,11 +415,9 @@ class BrainRouter:
     RETRY_MAIN_AFTER_QUOTA = 600.0   # out of tokens: free limits usually reset within minutes
 
     def __init__(self, main_url: str, main_key: str = "", local_url: str = "http://127.0.0.1:11434/v1",
-                 local_model: str = "", mode: str = "auto", models=local_models, clock=None, preferred: str = ""):
+                 local_model: str = "", mode: str = "auto", models=local_models, clock=None):
         import time as _time
         self.main = ChatClient(main_url, main_key)
-        if preferred and preferred.strip() and preferred.strip() != "auto":
-            self.main.routes = (preferred.strip(), "auto", "auto:reliable")
         self.local_url, self.local_model, self.mode = local_url, local_model, mode
         self._models, self._clock = models, clock or _time.monotonic
         self._local: ChatClient | None = None

@@ -59,7 +59,6 @@ def _write_atomic(path: Path, data: bytes) -> None:
 
 DEFAULTS = {
     "llm_url": "http://127.0.0.1:31415/v1",
-    "llm_model": "",                       # preferred FreeLLMAPI model, tried first (empty: FreeLLMAPI chooses)
     "workspaces": "",                      # your own project folders Echo may edit: "website=C:\\…\\site; app=D:\\code\\app"
     "mcp_ai_tools": True,                 # the AI may use your MCP servers' tools (anything not read-only still asks)
     "internet_access": True,              # Echo may search the web, read pages and call public APIs (downloads still ask)
@@ -79,18 +78,17 @@ DEFAULTS = {
     "web_extra_sites": "",      # more sites: "Name=https://example.com;Other=https://…"
     "mcp_servers": [],          # extra MCP servers: [{"name", "command", "args", "env"}]
     "phone_bridge": False,      # accept web tasks from the phone over adb reverse (127.0.0.1:31419)
-    "phone_link": False,        # (on once setup installs the phone app) when the phone connects over adb, give it this PC's AI/voice ports again
     "wake_word": False,
-    "use_kokoro": True,
-    "kokoro_endpoint": "https://127.0.0.1:31416/v1/tts",
-    "kokoro_fingerprint": "",
+    "use_gemini": True,
+    "gemini_model": "gemini-3.1-flash-tts-preview",
+    "gemini_voice": "Achernar",
     "orb_size": 96,
     "orb_opacity": 0.75,
     "orb_color": "",
     "orb_x": -1,
     "orb_y": -1,
     "interruptions": True,     # say "stop" / "wait" while Echo talks
-    "fast_voice": True,        # keep the voice and recogniser loaded and waiting: talking/listening starts instantly
+    "fast_voice": False,       # load speech helpers only when explicitly requested
     "native_tools": True,      # the AI acts through real tool calls (several steps per request); off: Echo's JSON format
     "stream_replies": True,    # speak the AI's answer sentence by sentence while it is still being written
     "replies_muted": False,    # text-only replies
@@ -106,7 +104,7 @@ DEFAULTS = {
     "hotkey": "ctrl+alt+e",    # press anywhere to talk to Echo; empty turns it off
     "telegram": False,         # message Echo from your own Telegram bot (token in secrets)
     "telegram_chat": 0,        # the one Telegram chat allowed to talk to Echo (approved on the PC)
-    "auto_start_helpers": True,  # start the natural voice and Whisper hosts with Echo when they're set up
+    "auto_start_helpers": False,  # speech services are started explicitly
     "adb_path": "",           # adb.exe for "unlock my phone" (empty: found automatically)
 }
 
@@ -142,17 +140,6 @@ class Settings:
         _write_atomic(self.secret_path, protect(json.dumps(self.secrets).encode("utf-8")))
 
 
-# "never ask me for confirmation", "always proceed without asking", "you're allowed to delete anything": a memory like
-# this would sit in every AI prompt as a standing instruction against Echo's own safety rules
-UNSAFE_RULE = re.compile(
-    r"(?i)\b(?:never|don'?t|do not|stop|no more|skip|without|bypass|disable|turn off|ignore)\b.{0,40}"
-    r"\b(?:confirm\w*|ask(?:ing)?\s+(?:me\s+)?(?:first|before|for\s+(?:confirmation|permission|approval))|permission|"
-    r"popups?|pop-ups?|warnings?|safety|security\s+checks?|approv\w*)"
-    r"|\b(?:always|just)\s+(?:proceed|go ahead|do it|delete|send|run)\b"
-    r"|\b(?:allowed|permitted|authori[sz]ed)\s+to\s+(?:delete|send|run|install|uninstall|format|share)\b"
-    r"|\bignore\s+(?:your|all|any|previous)\s+(?:rules|instructions)\b")
-
-
 class MemoryStore:
     """Long-term memory: DPAPI-encrypted JSON, same rules as the phone (secrets never stored)."""
 
@@ -184,8 +171,6 @@ class MemoryStore:
             return "invalid"
         if core.is_sensitive(clean):
             return "sensitive"
-        if UNSAFE_RULE.search(clean):
-            return "unsafe"                 # memories the AI reads must never switch off Echo's safety checks
         if source != "user" and lessons.is_opinion(clean):
             return "opinion"
         slot = lessons.memory_slot(clean)

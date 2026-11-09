@@ -2,7 +2,6 @@ import hmac
 import io
 import json
 import os
-import re
 import ssl
 import threading
 import wave
@@ -19,19 +18,6 @@ KEY = os.environ["ECHO_VOICE_KEY_FILE"]
 
 kokoro = Kokoro(MODEL, VOICES)
 synthesis_lock = threading.Lock()
-DEFAULT_VOICE = "af_heart"
-VOICE_PATTERN = re.compile(r"^[a-z]{2}_[a-z]{2,16}$")
-try:
-    AVAILABLE_VOICES = set(kokoro.get_voices())
-except Exception:
-    AVAILABLE_VOICES = {DEFAULT_VOICE}
-
-
-def pick_voice(requested):
-    """Persona voices are allow-listed against the installed voice pack; anything else uses af_heart."""
-    if isinstance(requested, str) and VOICE_PATTERN.match(requested) and requested in AVAILABLE_VOICES:
-        return requested
-    return DEFAULT_VOICE
 
 
 def as_wav(samples, sample_rate):
@@ -75,7 +61,7 @@ class Handler(BaseHTTPRequestHandler):
         if not self.authorized():
             self.send_json(401, {"error": "Unauthorized"})
         elif self.path == "/health":
-            self.send_json(200, {"status": "ok", "voice": DEFAULT_VOICE, "voices": sorted(AVAILABLE_VOICES), "engine": "Kokoro-82M"})
+            self.send_json(200, {"status": "ok", "voice": "af_heart", "engine": "Kokoro-82M"})
         else:
             self.send_json(404, {"error": "Not found"})
 
@@ -92,11 +78,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(413, {"error": "Request size must be between 2 and 32768 bytes."})
                 return
             data = json.loads(self.rfile.read(length))
-            if not isinstance(data, dict):
-                raise ValueError("JSON body must be an object")
             text = str(data.get("text", "")).strip()
             speed = float(data.get("rate", 0.9))
-            voice = pick_voice(data.get("voice"))
             if not text or len(text) > 4000:
                 self.send_json(400, {"error": "Text is required and limited to 4,000 characters."})
                 return
@@ -109,20 +92,18 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             with synthesis_lock:
-                lang = "en-gb" if voice.startswith("b") else "en-us"
-                samples, sample_rate = kokoro.create(text, voice=voice, speed=speed, lang=lang)
+                samples, sample_rate = kokoro.create(
+                    text, voice="af_heart", speed=speed, lang="en-us"
+                )
             audio = as_wav(samples, sample_rate)
+            self.send_response(200)
+            self.send_header("Content-Type", "audio/wav")
+            self.send_header("Content-Length", str(len(audio)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(audio)
         except Exception:
             self.send_json(503, {"error": "Kokoro could not synthesize this text."})
-            return
-        # Send outside the synthesis try: a client disconnect must not trigger a second response.
-        self.send_response(200)
-        self.send_header("Content-Type", "audio/wav")
-        self.send_header("X-Echo-Voice", voice)
-        self.send_header("Content-Length", str(len(audio)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
-        self.wfile.write(audio)
 
     def do_HEAD(self):
         self.send_json(405, {"error": "Method not allowed."})
@@ -139,6 +120,4 @@ try:
     server.serve_forever(poll_interval=0.25)
 finally:
     server.server_close()
-    close_voices = getattr(kokoro.voices, "close", None)
-    if callable(close_voices):
-        close_voices()
+    kokoro.voices.close()
